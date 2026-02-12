@@ -1,3 +1,5 @@
+datasets==3.6.0 # using older version to avoid an error that dataset scripts are not longer supported
+# (hateXplain dataset hasnt been updated after a change in datasets library)
 numpy
 pandas
 scikit-learn
