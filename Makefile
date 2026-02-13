@@ -5,4 +5,4 @@ install:
 	 pip install -e .
 
 app:
-	streamlit run student_performance_xai/app/app.py
+	streamlit run hate_speech_xai/app/app.py
