@@ -1,4 +1,3 @@
-# src/load_hatexplain.py
 from datasets import load_dataset
 
 def load_hatexplain_dataset():
