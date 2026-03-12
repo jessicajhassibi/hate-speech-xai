@@ -4,7 +4,7 @@
 This repository contains the code and experiments for an Explainable AI (XAI) study on a Hate Speech dataset. I
 The report is currently being written under [this link](https://www.overleaf.com/read/bvdccnjzcstc#da316e)
 
-## The data
+### References
 [HateXplain Dataset](https://github.com/hate-alert/HateXplain).
 Used in the following paper:
 @inproceedings{mathew2021hatexplain,
@@ -18,7 +18,21 @@ Used in the following paper:
 }
 
 ## Running the project 
+### Option A: using Makefile
+#### Installation of dependencies
+`make install`
+#### Accessing the data
+The dataset is accessed via Hugging Face: [Link to data](https://huggingface.co/datasets/Hate-speech-CNERG/hatexplain).
+There is no need to download it manually. The `datasets` library will handle the download and caching of the dataset when you run the app for the first time.
+#### Starting the app
+`make app`
 
+### Option B: manual
+```
+pip install -r requirements.txt
+pip install -e .
+streamlit run hate_speech_xai/app/app.py
+```
 
 ## Visualizations
 
