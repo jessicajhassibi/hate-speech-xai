@@ -4,8 +4,15 @@
 This repository contains the code and experiments for an Explainable AI (XAI) study on a Hate Speech dataset. I
 The report is currently being written under [this link](https://www.overleaf.com/read/bvdccnjzcstc#da316e)
 
+## What are we doing here?
+We are interested in understanding the decision-making process of a hate speech detection model. 
+We will be using the HateXplain dataset [1], which contains social media posts labeled for hate speech, 
+along with explanations for why a post is considered toxic or not. 
+We will train a machine learning model on this dataset and then apply various XAI techniques 
+to understand which features are most influential in the models decision of whether a post is classified as hate speech or not.
+
 ### References
-[HateXplain Dataset](https://github.com/hate-alert/HateXplain).
+[1] [HateXplain Dataset](https://github.com/hate-alert/HateXplain).
 Used in the following paper:
 @inproceedings{mathew2021hatexplain,
   title={HateXplain: A Benchmark Dataset for Explainable Hate Speech Detection},
