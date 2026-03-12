@@ -26,4 +26,40 @@ st.write(majority_label)
 st.subheader("Rationales")
 st.write("Rationale:", example['rationales'])
 
+st.write("Label meaning: 0=hatespeech, 1=normal, 2=offensive")
 
+##############################################################
+st.subheader("Dummy Explanation (for demo purposes)")
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Dummy prediction
+labels = ["normal", "offensive", "hate"]
+pred_label = np.random.choice(labels)
+st.subheader("Predicted Label")
+st.write(pred_label)
+
+# Token-level importance (random placeholder)
+importance = np.random.rand(len(tokens))
+
+# Normalize for visualization
+importance = importance / importance.max()
+
+# Plot heatmap
+fig, ax = plt.subplots(figsize=(10, 0.6))
+ax.imshow([importance], cmap="Reds", aspect="auto")
+ax.set_yticks([])
+ax.set_xticks(range(len(tokens)))
+ax.set_xticklabels(tokens, rotation=45, ha='right')
+ax.set_title("Token-level Importance (Random for Demo)")
+
+st.pyplot(fig)
+
+# Show ground truth rationales
+if st.checkbox("Show ground truth rationales"):
+    # Union across annotators
+    import numpy as np
+    rationales = np.array(example['rationales'])
+    rationale_mask = np.max(rationales, axis=0)
+    st.write("Rationale mask (1=important token):")
+    st.write(rationale_mask)
