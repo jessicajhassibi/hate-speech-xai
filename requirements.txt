@@ -7,4 +7,5 @@ matplotlib
 seaborn
 streamlit
 setuptools
+transformers
 jupyter
