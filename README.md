@@ -7,7 +7,7 @@ The report is currently being written under [this link](https://www.overleaf.com
 ## What are we doing here?
 We are interested in understanding the decision-making process of a hate speech detection model. 
 We will be using the HateXplain dataset [1], which contains social media posts labeled for hate speech, 
-along with explanations for why a post is considered toxic or not. 
+along with rationales that indicate why exactly a post is considered toxic or not. 
 We will train a machine learning model on this dataset and then apply various XAI techniques 
 to understand which features are most influential in the models decision of whether a post is classified as hate speech or not.
 
