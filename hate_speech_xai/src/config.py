@@ -1,10 +1,19 @@
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SAVED_MODELS_DIR = os.path.join(BASE_DIR, "models", "hatexplain_classifier")
+os.makedirs(SAVED_MODELS_DIR, exist_ok=True)
+CHECKPOINT_DIR = os.path.join(BASE_DIR, "checkpoints")
+os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+
+# Model and training configuration
 MODEL_NAME = "bert-base-uncased"
 TRUNCATION = True
 PADDING = "max_length"
 MAX_LENGTH = 128
 NUM_LABELS = 3
 TRAINING_ARGS = {
-	"output_dir": "./results",
+	"output_dir": CHECKPOINT_DIR,
     "num_train_epochs": 3,
     "per_device_train_batch_size": 16,
     "per_device_eval_batch_size": 32,

@@ -68,3 +68,7 @@ htmlcov/
 # Environment variables
 # =========================
 .env
+
+# model artifacts
+models/
+checkpoints/

@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.metrics import f1_score, accuracy_score
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer
 
-from hate_speech_xai.src.config import MODEL_NAME, NUM_LABELS, TRAINING_ARGS
+from hate_speech_xai.src.config import MODEL_NAME, NUM_LABELS, TRAINING_ARGS, SAVED_MODELS_DIR
 
 model = AutoModelForSequenceClassification.from_pretrained(
     MODEL_NAME,
@@ -28,3 +28,6 @@ def train_transformer(train, val):
         compute_metrics=compute_metrics
     )
     trainer.train()
+    trainer.save_model(SAVED_MODELS_DIR)
+    tokenizer.save_pretrained(SAVED_MODELS_DIR)
+    trainer.state.save_to_json(SAVED_MODELS_DIR.join("trainer_state.json"))

@@ -18,7 +18,7 @@ st.subheader("Post Tokens")
 st.write(" ".join(tokens))
 
 st.subheader("Majority Label")
-st.write(get_majority_label(example))
+st.write(get_majority_label(example["annotators"]["label"]))
 
 st.subheader("Rationales")
 st.write("Rationale:", example['rationales'])
