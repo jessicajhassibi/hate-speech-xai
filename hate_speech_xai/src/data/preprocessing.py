@@ -7,7 +7,7 @@ from transformers import AutoTokenizer
 import numpy as np
 
 from hate_speech_xai.src.config import MODEL_NAME, MAX_LENGTH, TRUNCATION, PADDING
-from hate_speech_xai.src.load_hatexplain import load_hatexplain_dataset
+from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 

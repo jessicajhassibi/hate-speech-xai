@@ -1,8 +1,6 @@
-from collections import Counter
-
 import streamlit as st
-from hate_speech_xai.src.load_hatexplain import load_hatexplain_dataset
-
+from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
+from hate_speech_xai.src.data.preprocessing import get_majority_label
 
 st.set_page_config(page_title="Hate Speech XAI", layout="wide")
 st.title("Hate Speech XAI")
@@ -20,8 +18,7 @@ st.subheader("Post Tokens")
 st.write(" ".join(tokens))
 
 st.subheader("Majority Label")
-majority_label = Counter(example['annotators']['label']).most_common(1)[0][0]
-st.write(majority_label)
+st.write(get_majority_label(example))
 
 st.subheader("Rationales")
 st.write("Rationale:", example['rationales'])
