@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.metrics import f1_score, accuracy_score
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer
 
-from hate_speech_xai.src.config import MODEL_NAME, NUM_LABELS, TRAINING_ARGS, SAVED_MODELS_DIR
+from hate_speech_xai.config import MODEL_NAME, NUM_LABELS, TRAINING_ARGS, SAVED_MODELS_DIR
 
 model = AutoModelForSequenceClassification.from_pretrained(
     MODEL_NAME,

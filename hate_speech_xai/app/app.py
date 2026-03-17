@@ -1,6 +1,13 @@
 import streamlit as st
+
+from hate_speech_xai.app.design import set_font, set_containers, give_credit_to_photographer2, \
+    set_header, add_styling
+from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
 from hate_speech_xai.src.data.preprocessing import get_majority_label
+from hate_speech_xai.src.models.predict import predict
+
+add_styling("background_image2.jpg")
 
 st.set_page_config(page_title="Hate Speech XAI", layout="wide")
 st.title("Hate Speech XAI")
@@ -17,13 +24,43 @@ tokens = example['post_tokens']
 st.subheader("Post Tokens")
 st.write(" ".join(tokens))
 
-st.subheader("Majority Label")
+st.subheader("Majority Label as ground truth")
 st.write(get_majority_label(example["annotators"]["label"]))
 
-st.subheader("Rationales")
-st.write("Rationale:", example['rationales'])
-
 st.write("Label meaning: 0=hatespeech, 1=normal, 2=offensive")
+
+st.subheader("Highlighted rationales")
+rationale = example["rationales"][0]
+
+highlighted = []
+for token, r in zip(tokens, rationale):
+    if r == 1:
+        highlighted.append(f"**{token}**")
+    else:
+        highlighted.append(token)
+
+st.write(" ".join(highlighted))
+
+
+##############################################################
+st.subheader("Hate Speech Classifier")
+st.write("Trained model: ", MODEL_NAME)
+text = " ".join(example["post_tokens"])
+predicted_label = predict(text)
+predicted_label = LABELS[predicted_label]
+st.write("Predicted Label")
+st.write(predicted_label)
+
+##############################################################
+st.subheader("Try it yourself!")
+custom_text = st.text_area("Enter a post")
+
+if st.button("Predict"):
+    predicted_label = predict(custom_text)
+    predicted_label = LABELS[predicted_label]
+
+    #st.write("Prediction:", label)
+    #st.write("Probabilities:", probs)
 
 ##############################################################
 st.subheader("Dummy Explanation (for demo purposes)")
@@ -60,3 +97,5 @@ if st.checkbox("Show ground truth rationales"):
     rationale_mask = np.max(rationales, axis=0)
     st.write("Rationale mask (1=important token):")
     st.write(rationale_mask)
+
+give_credit_to_photographer2()

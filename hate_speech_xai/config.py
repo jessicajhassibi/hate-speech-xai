@@ -1,10 +1,16 @@
-import os
+from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SAVED_MODELS_DIR = os.path.join(BASE_DIR, "models", "hatexplain_classifier")
-os.makedirs(SAVED_MODELS_DIR, exist_ok=True)
-CHECKPOINT_DIR = os.path.join(BASE_DIR, "checkpoints")
-os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+BASE_DIR = Path(__file__).parent
+SAVED_MODELS_DIR = Path(BASE_DIR) / "src/models/hatexplain_classifier"
+CHECKPOINT_DIR = Path(BASE_DIR) / "checkpoints"
+DATA_DIR = Path(BASE_DIR) / "data"
+
+# Labels in HateXplain
+LABELS = {
+    0: "Hate speech",
+    1: "Normal",
+    2: "Offensive"
+}
 
 # Model and training configuration
 MODEL_NAME = "bert-base-uncased"

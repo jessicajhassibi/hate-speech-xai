@@ -1,4 +1,4 @@
-from hate_speech_xai.src.config import CHECKPOINT_DIR, SAVED_MODELS_DIR
+from hate_speech_xai.config import CHECKPOINT_DIR, SAVED_MODELS_DIR
 from hate_speech_xai.src.models.predict import load_model
 
 # script to run saving the model was missed

@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-from hate_speech_xai.src.config import SAVED_MODELS_DIR, MODEL_NAME
+from hate_speech_xai.config import SAVED_MODELS_DIR
 
 
 def load_model(source=SAVED_MODELS_DIR):
@@ -14,6 +14,6 @@ def predict(post: str):
 	tokenizer, model = load_model()
 	inputs = tokenizer(post, return_tensors="pt", truncation=True)
 	with torch.no_grad():
-		outputs = model(**inputs)
-	pred = torch.argmax(outputs.logits, dim=1)
-	print(pred)
+		logits = model(**inputs).logits
+	predicted_class_id = logits.argmax().item()
+	return predicted_class_id
