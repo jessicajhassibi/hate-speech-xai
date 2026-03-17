@@ -82,42 +82,6 @@ def add_styling(background_image_name: str):
         """
     st.markdown(css, unsafe_allow_html=True)
 
-
-def set_font():
-    st.markdown(
-        """
-        <style>
-        h1, h2, h3, h4, h5, h6, p, div, label {
-            color: white !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-def set_header():
-    st.markdown("""
-    <style>
-    header {
-        background: transparent !important;
-    }
-    <style>""")
-
-def set_containers():
-    st.markdown(
-        """
-        <style>
-        .block-container {
-            color: white;
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 2rem;
-            border-radius: 15px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
 def give_credit_to_photographer1():
     st.markdown(
         """

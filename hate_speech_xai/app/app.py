@@ -1,7 +1,6 @@
 import streamlit as st
 
-from hate_speech_xai.app.design import set_font, set_containers, give_credit_to_photographer2, \
-    set_header, add_styling
+from hate_speech_xai.app.design import give_credit_to_photographer2, add_styling
 from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
 from hate_speech_xai.src.data.preprocessing import get_majority_label
