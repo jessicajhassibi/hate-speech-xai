@@ -1,10 +1,12 @@
+import numpy as np
 import streamlit as st
+from matplotlib import pyplot as plt
 
 from hate_speech_xai.app.design import give_credit_to_photographer2, add_styling
 from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
 from hate_speech_xai.src.data.preprocessing import get_majority_label
-from hate_speech_xai.src.models.predict import predict
+from hate_speech_xai.src.models.predict import predict_label
 
 add_styling("background_image2.jpg")
 
@@ -26,51 +28,62 @@ st.write(" ".join(tokens))
 st.subheader("Majority Label as ground truth")
 st.write(get_majority_label(example["annotators"]["label"]))
 
-st.write("Label meaning: 0=hatespeech, 1=normal, 2=offensive")
+st.write(f"Label meaning: 0 = {LABELS[0]}, 1 = {LABELS[1]}, 2 = {LABELS[2]}")
 
 st.subheader("Highlighted rationales")
-rationale = example["rationales"][0]
 
-highlighted = []
-for token, r in zip(tokens, rationale):
-    if r == 1:
-        highlighted.append(f"**{token}**")
-    else:
-        highlighted.append(token)
+def render_rationale(tokens, rationale):
+	highlighted = []
 
-st.write(" ".join(highlighted))
+	for token, r in zip(tokens, rationale):
+		if r == 1:
+			highlighted.append(
+				f'<span style="background-color: #ff4b4b; color: white; padding: 2px 4px; border-radius: 4px;">{token}</span>'
+			)
+		else:
+			highlighted.append(token)
+
+	return " ".join(highlighted)
+
+annotator_ids = example["annotators"]["annotator_id"]
+
+annotator_choice = st.radio(
+	"Choose annotator",
+	[f"Annotator ID {aid}" for aid in annotator_ids],
+	horizontal=True,
+	key=f"annotator_{post_idx}"
+)
+
+# Extract the selected annotator ID and find its index
+selected_id = int(annotator_choice.split()[-1])
+annotator_index = annotator_ids.index(selected_id)-1
+
+# Get the rationale for the selected annotator
+rationale = example["rationales"][annotator_index]
+html = render_rationale(tokens, rationale)
+st.markdown(html, unsafe_allow_html=True)
 
 
 ##############################################################
 st.subheader("Hate Speech Classifier")
 st.write("Trained model: ", MODEL_NAME)
 text = " ".join(example["post_tokens"])
-predicted_label = predict(text)
+predicted_label = predict_label(text)
 predicted_label = LABELS[predicted_label]
 st.write("Predicted Label")
 st.write(predicted_label)
 
 ##############################################################
-st.subheader("Try it yourself!")
+st.subheader("Try it yourself! 😈")
 custom_text = st.text_area("Enter a post")
 
 if st.button("Predict"):
-    predicted_label = predict(custom_text)
-    predicted_label = LABELS[predicted_label]
-
-    #st.write("Prediction:", label)
-    #st.write("Probabilities:", probs)
+    predicted_label_for_custom_text = predict_label(custom_text)
+    predicted_label_for_custom_text = LABELS[predicted_label_for_custom_text]
+    st.write("Predicted Label for your post: ", predicted_label_for_custom_text)
 
 ##############################################################
-st.subheader("Dummy Explanation (for demo purposes)")
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Dummy prediction
-labels = ["normal", "offensive", "hate"]
-pred_label = np.random.choice(labels)
-st.subheader("Predicted Label")
-st.write(pred_label)
+st.subheader("Explanation Visualization")
 
 # Token-level importance (random placeholder)
 importance = np.random.rand(len(tokens))
@@ -87,14 +100,5 @@ ax.set_xticklabels(tokens, rotation=45, ha='right')
 ax.set_title("Token-level Importance (Random for Demo)")
 
 st.pyplot(fig)
-
-# Show ground truth rationales
-if st.checkbox("Show ground truth rationales"):
-    # Union across annotators
-    import numpy as np
-    rationales = np.array(example['rationales'])
-    rationale_mask = np.max(rationales, axis=0)
-    st.write("Rationale mask (1=important token):")
-    st.write(rationale_mask)
 
 give_credit_to_photographer2()

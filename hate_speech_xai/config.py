@@ -1,7 +1,7 @@
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
-SAVED_MODELS_DIR = Path(BASE_DIR) / "src/models/hatexplain_classifier"
+SAVED_MODELS_DIR = Path(BASE_DIR) / "models/hatexplain_classifier"
 CHECKPOINT_DIR = Path(BASE_DIR) / "checkpoints"
 DATA_DIR = Path(BASE_DIR) / "data"
 

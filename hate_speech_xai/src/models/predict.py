@@ -10,7 +10,7 @@ def load_model(source=SAVED_MODELS_DIR):
 	return tokenizer, model
 
 
-def predict(post: str):
+def predict_label(post: str):
 	tokenizer, model = load_model()
 	inputs = tokenizer(post, return_tensors="pt", truncation=True)
 	with torch.no_grad():

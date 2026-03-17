@@ -59,14 +59,14 @@ def add_styling(background_image_name: str):
         /* Text input and text area */
         .stTextInput > div > div > input,
         .stTextArea > div > div > textarea {{
-            background-color: rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: black !important;
+            border: 1px solid rgba(0, 0, 0, 0.3) !important;
         }}
 
         .stTextInput > div > div > input::placeholder,
         .stTextArea > div > div > textarea::placeholder {{
-            color: rgba(255, 255, 255, 0.6) !important;
+            color: rgba(0, 0, 0, 0.4) !important;
         }}
 
         /* Slider track */
