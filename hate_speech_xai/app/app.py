@@ -56,12 +56,15 @@ annotator_choice = st.radio(
 
 # Extract the selected annotator ID and find its index
 selected_id = int(annotator_choice.split()[-1])
-annotator_index = annotator_ids.index(selected_id)-1
+annotator_index = annotator_ids.index(selected_id)
 
-# Get the rationale for the selected annotator
-rationale = example["rationales"][annotator_index]
-html = render_rationale(tokens, rationale)
-st.markdown(html, unsafe_allow_html=True)
+# Get the rationale for the selected annotator (not all annotators have rationales)
+if annotator_index < len(example["rationales"]):
+	rationale = example["rationales"][annotator_index]
+	html = render_rationale(tokens, rationale)
+	st.markdown(html, unsafe_allow_html=True)
+else:
+	st.info("No rationale available for this annotator.")
 
 
 ##############################################################
