@@ -1,9 +1,10 @@
+import random
 import streamlit as st
 from matplotlib import pyplot as plt
 
-from hate_speech_xai.app.design import (
-	give_credit_to_photographer1, give_credit_to_photographer2,
-	add_styling_photo, add_styling_professional,
+from hate_speech_xai.app.styling import (
+	THEMES, apply_theme, render_label_badge, render_rationale,
+	render_speech_bubble, render_photo_credit,
 )
 from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
@@ -11,51 +12,36 @@ from hate_speech_xai.src.data.preprocessing import get_majority_label
 from hate_speech_xai.src.models.predict import predict_label
 from hate_speech_xai.src.models.explain import EXPLANATION_METHODS
 
-THEMES = {
-	"Professional": None,
-	"Provocative Photo": ("background_image.jpg", give_credit_to_photographer1),
-	"Post No Hate Photo": ("background_image2.jpg", give_credit_to_photographer2),
-}
-
 st.set_page_config(page_title="Hate Speech XAI", layout="wide")
 
-with st.expander("Choose a different theme"):
-	theme = st.radio("Theme", list(THEMES.keys()), horizontal=True, label_visibility="collapsed")
-
-if THEMES[theme] is not None:
-	add_styling_photo(THEMES[theme][0])
-else:
-	add_styling_professional()
+theme = st.sidebar.selectbox("Theme", THEMES, label_visibility="collapsed")
+apply_theme(theme)
 
 st.title("Hate Speech XAI")
 
+st.subheader("HateXplain Sample Posts")
 train_ds, val_ds, test_ds = load_hatexplain_dataset()
 
-###################################################
-st.subheader("HateXplain Sample Posts")
-
-# Collect all unique target categories
+# Collect all target categories across annotators
 all_targets = set()
 for i in range(len(train_ds)):
 	for annotator_targets in train_ds[i]["annotators"]["target"]:
-		for t in annotator_targets:
-			all_targets.add(t)
+		all_targets.update(annotator_targets)
 
 selected_targets = st.multiselect(
 	"Filter by target group",
 	sorted(all_targets),
-	help="Select one or more target groups to filter posts. Leave empty to show all."
 )
 
-# Filter dataset indices by selected targets
 if selected_targets:
-	filtered_indices = []
-	for i in range(len(train_ds)):
-		post_targets = set()
-		for annotator_targets in train_ds[i]["annotators"]["target"]:
-			post_targets.update(annotator_targets)
-		if post_targets & set(selected_targets):
-			filtered_indices.append(i)
+	selected_set = set(selected_targets)
+	filtered_indices = [
+		i for i in range(len(train_ds))
+		if any(
+			set(targets) & selected_set
+			for targets in train_ds[i]["annotators"]["target"]
+		)
+	]
 else:
 	filtered_indices = list(range(len(train_ds)))
 
@@ -65,95 +51,84 @@ if not filtered_indices:
 	st.warning("No posts match the selected filters.")
 	st.stop()
 
-slider_idx = st.slider("Select a post", 0, len(filtered_indices) - 1, 0)
+slider_idx = st.slider("Select a post by adjusting the slider or press the button for a random post", 0, len(filtered_indices) - 1,
+					   st.session_state.get("random_idx", 0))
+
+if st.button("Random"):
+	st.session_state["random_idx"] = random.randint(0, len(filtered_indices) - 1)
+	st.rerun()
+
 post_idx = filtered_indices[slider_idx]
 example = train_ds[post_idx]
 
-tokens = example['post_tokens']
 st.subheader("Post Tokens")
-st.write(" ".join(tokens))
+tokens = example["post_tokens"]
+text = " ".join(tokens)
+st.markdown(render_speech_bubble(text, dark_bg=(theme == "Dark")), unsafe_allow_html=True)
 
-st.subheader("Majority Label as ground truth")
-st.write(get_majority_label(example["annotators"]["label"]))
+st.subheader("Ground Truth (Majority Label)", help="The most common label assigned by annotators is used as the "
+											   "ground truth for this post. There are 3 possible labels: "
+											   "hate speech, offensive, and normal")
+ground_truth_id = get_majority_label(example["annotators"]["label"])
+st.markdown(render_label_badge(LABELS[ground_truth_id]), unsafe_allow_html=True)
 
-st.write(f"Label meaning: 0 = {LABELS[0]}, 1 = {LABELS[1]}, 2 = {LABELS[2]}")
-
-st.subheader("Highlighted rationales")
-
-def render_rationale(tokens, rationale):
-	highlighted = []
-
-	for token, r in zip(tokens, rationale):
-		if r == 1:
-			highlighted.append(
-				f'<span style="background-color: #ff4b4b; color: white; padding: 2px 4px; border-radius: 4px;">{token}</span>'
-			)
-		else:
-			highlighted.append(token)
-
-	return " ".join(highlighted)
+st.subheader("Highlighted Rationales")
 
 annotator_ids = example["annotators"]["annotator_id"]
-
 annotator_choice = st.radio(
 	"Choose annotator",
 	[f"Annotator ID {aid}" for aid in annotator_ids],
 	horizontal=True,
-	key=f"annotator_{post_idx}"
+	key=f"annotator_{post_idx}",
 )
 
-# Extract the selected annotator ID and find its index
 selected_id = int(annotator_choice.split()[-1])
 annotator_index = annotator_ids.index(selected_id)
 
-# Get the rationale for the selected annotator (not all annotators have rationales)
+# Not all annotators have rationales
 if annotator_index < len(example["rationales"]):
 	rationale = example["rationales"][annotator_index]
-	html = render_rationale(tokens, rationale)
-	st.markdown(html, unsafe_allow_html=True)
+	st.markdown(render_rationale(tokens, rationale), unsafe_allow_html=True)
 else:
 	st.info("No rationale available for this annotator.")
 
-
-##############################################################
 st.subheader("Hate Speech Classifier")
 st.write("Trained model: ", MODEL_NAME)
-text = " ".join(example["post_tokens"])
-predicted_label = predict_label(text)
-predicted_label = LABELS[predicted_label]
-st.write("Predicted Label")
-st.write(predicted_label)
 
-##############################################################
+predicted_label_id = predict_label(text)
+st.markdown(
+	f"Predicted: {render_label_badge(LABELS[predicted_label_id])}",
+	unsafe_allow_html=True,
+)
+
 st.subheader("Try it yourself!")
 custom_text = st.text_area("Enter a mean post 😈")
 
 if st.button("Predict"):
-    predicted_label_for_custom_text = predict_label(custom_text)
-    predicted_label_for_custom_text = LABELS[predicted_label_for_custom_text]
-    st.write("Predicted Label for your post: ", predicted_label_for_custom_text)
+	custom_label_id = predict_label(custom_text)
+	st.markdown(
+		f"Predicted: {render_label_badge(LABELS[custom_label_id])}",
+		unsafe_allow_html=True,
+	)
 
-##############################################################
 st.subheader("Explanation Visualization")
 
 method_name = st.selectbox("Explanation method", list(EXPLANATION_METHODS.keys()))
 explain_fn = EXPLANATION_METHODS[method_name]
-
 importance = explain_fn(text)
 
-# Align lengths (importance may be shorter/longer than tokens due to truncation)
+# Importance may be shorter than tokens due to truncation
 display_len = min(len(tokens), len(importance))
 importance = importance[:display_len]
 display_tokens = tokens[:display_len]
 
-# Plot heatmap
 fig, ax = plt.subplots(figsize=(10, 0.6))
 ax.imshow([importance], cmap="Reds", aspect="auto")
 ax.set_yticks([])
 ax.set_xticks(range(len(display_tokens)))
-ax.set_xticklabels(display_tokens, rotation=45, ha='right')
+ax.set_xticklabels(display_tokens, rotation=45, ha="right")
 ax.set_title(f"Token-level Importance ({method_name})")
-
 st.pyplot(fig)
 
-if THEMES[theme] is not None: THEMES[theme][1]()
+if theme == "Dark":
+	render_photo_credit()
