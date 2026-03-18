@@ -1,16 +1,32 @@
 import streamlit as st
 from matplotlib import pyplot as plt
 
-from hate_speech_xai.app.design import give_credit_to_photographer2, add_styling
+from hate_speech_xai.app.design import (
+	give_credit_to_photographer1, give_credit_to_photographer2,
+	add_styling_photo, add_styling_professional,
+)
 from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
 from hate_speech_xai.src.data.preprocessing import get_majority_label
 from hate_speech_xai.src.models.predict import predict_label
 from hate_speech_xai.src.models.explain import EXPLANATION_METHODS
 
-add_styling("background_image2.jpg")
+THEMES = {
+	"Professional": None,
+	"Provocative Photo": ("background_image.jpg", give_credit_to_photographer1),
+	"Post No Hate Photo": ("background_image2.jpg", give_credit_to_photographer2),
+}
 
 st.set_page_config(page_title="Hate Speech XAI", layout="wide")
+
+with st.expander("Choose a different theme"):
+	theme = st.radio("Theme", list(THEMES.keys()), horizontal=True, label_visibility="collapsed")
+
+if THEMES[theme] is not None:
+	add_styling_photo(THEMES[theme][0])
+else:
+	add_styling_professional()
+
 st.title("Hate Speech XAI")
 
 train_ds, val_ds, test_ds = load_hatexplain_dataset()
@@ -18,7 +34,39 @@ train_ds, val_ds, test_ds = load_hatexplain_dataset()
 ###################################################
 st.subheader("HateXplain Sample Posts")
 
-post_idx = st.slider("Select a post from the training set", 0, len(train_ds)-1, 0)
+# Collect all unique target categories
+all_targets = set()
+for i in range(len(train_ds)):
+	for annotator_targets in train_ds[i]["annotators"]["target"]:
+		for t in annotator_targets:
+			all_targets.add(t)
+
+selected_targets = st.multiselect(
+	"Filter by target group",
+	sorted(all_targets),
+	help="Select one or more target groups to filter posts. Leave empty to show all."
+)
+
+# Filter dataset indices by selected targets
+if selected_targets:
+	filtered_indices = []
+	for i in range(len(train_ds)):
+		post_targets = set()
+		for annotator_targets in train_ds[i]["annotators"]["target"]:
+			post_targets.update(annotator_targets)
+		if post_targets & set(selected_targets):
+			filtered_indices.append(i)
+else:
+	filtered_indices = list(range(len(train_ds)))
+
+st.write(f"Showing {len(filtered_indices)} posts")
+
+if not filtered_indices:
+	st.warning("No posts match the selected filters.")
+	st.stop()
+
+slider_idx = st.slider("Select a post", 0, len(filtered_indices) - 1, 0)
+post_idx = filtered_indices[slider_idx]
 example = train_ds[post_idx]
 
 tokens = example['post_tokens']
@@ -108,4 +156,4 @@ ax.set_title(f"Token-level Importance ({method_name})")
 
 st.pyplot(fig)
 
-give_credit_to_photographer2()
+if THEMES[theme] is not None: THEMES[theme][1]()
