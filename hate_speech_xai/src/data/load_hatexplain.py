@@ -8,7 +8,7 @@ def load_hatexplain_dataset():
     so calling the function again will not re-download it again
     https://huggingface.co/docs/datasets/cache
     """
-    dataset = load_dataset("Hate-speech-CNERG/hatexplain")
+    dataset = load_dataset("Hate-speech-CNERG/hatexplain", trust_remote_code=True)
 
     train_ds = dataset["train"]
     val_ds = dataset["validation"]
