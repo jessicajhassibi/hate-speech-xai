@@ -74,17 +74,20 @@ def preprocess_post(post: dict):
 		else:
 			token_rationale.append(int(rationales[word_id]))
 
-	encoding["label"] = label
+	encoding["labels"] = label
 	encoding["rationale_mask"] = token_rationale
 
 	return encoding
 
 
+_COLUMNS_TO_REMOVE = ["id", "annotators", "rationales", "post_tokens"]
+
+
 def preprocess_dataset() -> Tuple[Dataset, Dataset, Dataset]:
 	train, val, test = load_hatexplain_dataset()
 
-	train = train.map(preprocess_post)
-	val = val.map(preprocess_post)
-	test = test.map(preprocess_post)
+	train = train.map(preprocess_post, remove_columns=_COLUMNS_TO_REMOVE)
+	val = val.map(preprocess_post, remove_columns=_COLUMNS_TO_REMOVE)
+	test = test.map(preprocess_post, remove_columns=_COLUMNS_TO_REMOVE)
 
 	return train, val, test

@@ -4,11 +4,6 @@ from transformers import AutoModelForSequenceClassification, TrainingArguments, 
 
 from hate_speech_xai.config import MODEL_NAME, NUM_LABELS, TRAINING_ARGS, SAVED_MODELS_DIR
 
-model = AutoModelForSequenceClassification.from_pretrained(
-    MODEL_NAME,
-    num_labels=NUM_LABELS
-)
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
@@ -19,6 +14,12 @@ def compute_metrics(eval_pred):
 
 
 def train_transformer(train, val):
+    model = AutoModelForSequenceClassification.from_pretrained(
+        MODEL_NAME,
+        num_labels=NUM_LABELS
+    )
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
     trainer = Trainer(
         model=model,
         args=TrainingArguments(**TRAINING_ARGS),
@@ -30,4 +31,4 @@ def train_transformer(train, val):
     trainer.train()
     trainer.save_model(SAVED_MODELS_DIR)
     tokenizer.save_pretrained(SAVED_MODELS_DIR)
-    trainer.state.save_to_json(SAVED_MODELS_DIR.join("trainer_state.json"))
+    trainer.state.save_to_json(SAVED_MODELS_DIR / "trainer_state.json")

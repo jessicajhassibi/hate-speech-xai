@@ -1,4 +1,3 @@
-import numpy as np
 import streamlit as st
 from matplotlib import pyplot as plt
 
@@ -7,6 +6,7 @@ from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
 from hate_speech_xai.src.data.preprocessing import get_majority_label
 from hate_speech_xai.src.models.predict import predict_label
+from hate_speech_xai.src.models.explain import EXPLANATION_METHODS
 
 add_styling("background_image2.jpg")
 
@@ -77,8 +77,8 @@ st.write("Predicted Label")
 st.write(predicted_label)
 
 ##############################################################
-st.subheader("Try it yourself! 😈")
-custom_text = st.text_area("Enter a post")
+st.subheader("Try it yourself!")
+custom_text = st.text_area("Enter a mean post 😈")
 
 if st.button("Predict"):
     predicted_label_for_custom_text = predict_label(custom_text)
@@ -88,19 +88,23 @@ if st.button("Predict"):
 ##############################################################
 st.subheader("Explanation Visualization")
 
-# Token-level importance (random placeholder)
-importance = np.random.rand(len(tokens))
+method_name = st.selectbox("Explanation method", list(EXPLANATION_METHODS.keys()))
+explain_fn = EXPLANATION_METHODS[method_name]
 
-# Normalize for visualization
-importance = importance / importance.max()
+importance = explain_fn(text)
+
+# Align lengths (importance may be shorter/longer than tokens due to truncation)
+display_len = min(len(tokens), len(importance))
+importance = importance[:display_len]
+display_tokens = tokens[:display_len]
 
 # Plot heatmap
 fig, ax = plt.subplots(figsize=(10, 0.6))
 ax.imshow([importance], cmap="Reds", aspect="auto")
 ax.set_yticks([])
-ax.set_xticks(range(len(tokens)))
-ax.set_xticklabels(tokens, rotation=45, ha='right')
-ax.set_title("Token-level Importance (Random for Demo)")
+ax.set_xticks(range(len(display_tokens)))
+ax.set_xticklabels(display_tokens, rotation=45, ha='right')
+ax.set_title(f"Token-level Importance ({method_name})")
 
 st.pyplot(fig)
 
