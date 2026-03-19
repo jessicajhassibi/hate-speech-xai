@@ -19,13 +19,34 @@ apply_theme(theme)
 
 st.title("Hate Speech XAI")
 
-st.subheader("HateXplain Sample Posts")
 train_ds, val_ds, test_ds = load_hatexplain_dataset()
+splits = {"Train": train_ds, "Validation": val_ds, "Test": test_ds}
 
-# Collect all target categories across annotators
+st.subheader("HateXplain Dataset Explorer")
+
+selected_splits = st.multiselect(
+	"Filter by dataset split",
+	list(splits.keys()),
+	default=list(splits.keys()),
+	help="For exploring the dataset To evaluate the classifier's real performance, you should select only the Test set, becausex "
+		 "the model has never seen these samples during training.",
+)
+
+if not selected_splits:
+	st.warning("Select at least one split.")
+	st.stop()
+
+# Combine selected splits into one list of (split_name, index) pairs
+combined = []
+for split_name in selected_splits:
+	ds = splits[split_name]
+	for i in range(len(ds)):
+		combined.append((split_name, i))
+
+# Collect all target categories
 all_targets = set()
-for i in range(len(train_ds)):
-	for annotator_targets in train_ds[i]["annotators"]["target"]:
+for split_name, i in combined:
+	for annotator_targets in splits[split_name][i]["annotators"]["target"]:
 		all_targets.update(annotator_targets)
 
 selected_targets = st.multiselect(
@@ -35,31 +56,31 @@ selected_targets = st.multiselect(
 
 if selected_targets:
 	selected_set = set(selected_targets)
-	filtered_indices = [
-		i for i in range(len(train_ds))
+	filtered = [
+		(s, i) for s, i in combined
 		if any(
 			set(targets) & selected_set
-			for targets in train_ds[i]["annotators"]["target"]
+			for targets in splits[s][i]["annotators"]["target"]
 		)
 	]
 else:
-	filtered_indices = list(range(len(train_ds)))
+	filtered = combined
 
-st.write(f"Showing {len(filtered_indices)} posts")
+st.write(f"Showing {len(filtered)} posts")
 
-if not filtered_indices:
+if not filtered:
 	st.warning("No posts match the selected filters.")
 	st.stop()
 
-slider_idx = st.slider("Select a post by adjusting the slider or press the button for a random post", 0, len(filtered_indices) - 1,
+slider_idx = st.slider("Select a post by adjusting the slider or press the button for a random post", 0, len(filtered) - 1,
 					   st.session_state.get("random_idx", 0))
 
 if st.button("Random"):
-	st.session_state["random_idx"] = random.randint(0, len(filtered_indices) - 1)
+	st.session_state["random_idx"] = random.randint(0, len(filtered) - 1)
 	st.rerun()
 
-post_idx = filtered_indices[slider_idx]
-example = train_ds[post_idx]
+split_name, post_idx = filtered[slider_idx]
+example = splits[split_name][post_idx]
 
 st.subheader("Post Tokens")
 tokens = example["post_tokens"]
@@ -79,7 +100,7 @@ annotator_choice = st.radio(
 	"Choose annotator",
 	[f"Annotator ID {aid}" for aid in annotator_ids],
 	horizontal=True,
-	key=f"annotator_{post_idx}",
+	key=f"annotator_{split_name}_{post_idx}",
 )
 
 selected_id = int(annotator_choice.split()[-1])
@@ -96,10 +117,14 @@ st.subheader("Hate Speech Classifier")
 st.write("Trained model: ", MODEL_NAME)
 
 predicted_label_id = predict_label(text)
-st.markdown(
-	f"Predicted: {render_label_badge(LABELS[predicted_label_id])}",
-	unsafe_allow_html=True,
-)
+
+col1, col2 = st.columns(2)
+with col1:
+	st.write("Ground truth:")
+	st.markdown(render_label_badge(LABELS[ground_truth_id]), unsafe_allow_html=True)
+with col2:
+	st.write("Predicted:")
+	st.markdown(render_label_badge(LABELS[predicted_label_id]), unsafe_allow_html=True)
 
 st.subheader("Try it yourself!")
 custom_text = st.text_area("Enter a mean post 😈")
