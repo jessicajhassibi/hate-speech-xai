@@ -4,6 +4,7 @@ BASE_DIR = Path(__file__).parent
 SAVED_MODELS_DIR = Path(BASE_DIR) / "models/hatexplain_classifier"
 CHECKPOINT_DIR = Path(BASE_DIR) / "checkpoints"
 APP_DATA_DIR = Path(BASE_DIR) / "app/data"
+PREPROCESSED_DATA_DIR = Path(BASE_DIR) / "data/preprocessed"
 
 # Labels in HateXplain
 LABELS = {

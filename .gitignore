@@ -72,3 +72,6 @@ htmlcov/
 # model artifacts
 models/
 checkpoints/
+
+# preprocessed data
+data/

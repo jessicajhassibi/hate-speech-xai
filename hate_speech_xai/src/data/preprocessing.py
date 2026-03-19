@@ -1,13 +1,12 @@
 from collections import Counter
 from typing import Tuple
 
-from datasets import Dataset
+from datasets import Dataset, load_from_disk
 from transformers import AutoTokenizer
 
 import numpy as np
 
-from hate_speech_xai.config import MODEL_NAME, MAX_LENGTH, TRUNCATION, PADDING
-from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
+from hate_speech_xai.config import MODEL_NAME, MAX_LENGTH, TRUNCATION, PADDING, PREPROCESSED_DATA_DIR
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
@@ -24,70 +23,86 @@ def aggregate_rationales(annotators_rationales: list):
 	"""
 	if not annotators_rationales or len(annotators_rationales) == 0:
 		return np.array([])
-	
+
 	# Find the maximum length among all rationales (in case annotators marked different lengths)
 	max_length = max(len(rat) for rat in annotators_rationales)
-	
+
 	# Pad all rationales to the same length with zeros
 	padded_rationales = []
 	for rat in annotators_rationales:
 		padded = list(rat) + [0] * (max_length - len(rat))
 		padded_rationales.append(padded)
-	
+
 	return np.array(padded_rationales).max(axis=0)
 
 def reconstruct_post(tokens: list):
 	"""Reconstruct the original post text from the token list."""
 	return " ".join(tokens)
 
-def tokenize_text(text: str):
-	"""BERT uses subword tokenization, so we reconstruct the text before tokenizing."""
+
+def preprocess_post(post: dict):
+	"""Annotation-level preprocessing: majority label, aggregated rationales, joined text."""
+	label = get_majority_label(post["annotators"]["label"])
+	rationale = aggregate_rationales(post["rationales"])
+	text = reconstruct_post(post["post_tokens"])
+
+	return {
+		"text": text,
+		"label": label,
+		"rationale": rationale.tolist() if len(rationale) > 0 else [],
+	}
+
+
+def tokenize_post(post: dict):
+	"""Tokenize preprocessed post and align rationales with subword tokens."""
 	encoding = tokenizer(
-		text,
+		post["text"],
 		truncation=TRUNCATION,
 		padding=PADDING,
 		max_length=MAX_LENGTH
 	)
-	return encoding
 
-
-def preprocess_post(post: dict):
-	# Majority label
-	label = get_majority_label(post["annotators"]["label"])
-
-	# Aggregate rationales
-	rationales = aggregate_rationales(post["rationales"])
-
-	# Reconstruct text
-	text = reconstruct_post(post["post_tokens"])
-
-	# Tokenize
-	encoding = tokenize_text(text)
-
-	# Align rationales with subwords
+	rationale = post["rationale"]
 	word_ids = encoding.word_ids()
 	token_rationale = []
 
 	for word_id in word_ids:
-		if word_id is None or word_id >= len(rationales):
+		if word_id is None or word_id >= len(rationale):
 			token_rationale.append(0)
 		else:
-			token_rationale.append(int(rationales[word_id]))
+			token_rationale.append(int(rationale[word_id]))
 
-	encoding["labels"] = label
+	encoding["labels"] = post["label"]
 	encoding["rationale_mask"] = token_rationale
 
 	return encoding
 
 
-_COLUMNS_TO_REMOVE = ["id", "annotators", "rationales", "post_tokens"]
+_RAW_COLUMNS_TO_REMOVE = ["id", "annotators", "rationales", "post_tokens"]
+_PREPROCESSED_COLUMNS_TO_REMOVE = ["text", "rationale"]
 
 
-def preprocess_dataset() -> Tuple[Dataset, Dataset, Dataset]:
-	train, val, test = load_hatexplain_dataset()
+def preprocess_dataset(train: Dataset, val: Dataset, test: Dataset) -> Tuple[Dataset, Dataset, Dataset]:
+	"""Annotation-level preprocessing on raw dataset splits."""
+	train = train.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
+	val = val.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
+	test = test.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
 
-	train = train.map(preprocess_post, remove_columns=_COLUMNS_TO_REMOVE)
-	val = val.map(preprocess_post, remove_columns=_COLUMNS_TO_REMOVE)
-	test = test.map(preprocess_post, remove_columns=_COLUMNS_TO_REMOVE)
+	return train, val, test
+
+
+def tokenize_dataset(train: Dataset, val: Dataset) -> Tuple[Dataset, Dataset]:
+	"""Tokenize preprocessed dataset for training."""
+	train = train.map(tokenize_post, remove_columns=_PREPROCESSED_COLUMNS_TO_REMOVE)
+	val = val.map(tokenize_post, remove_columns=_PREPROCESSED_COLUMNS_TO_REMOVE)
+
+	return train, val
+
+
+def load_preprocessed_dataset() -> Tuple[Dataset, Dataset, Dataset]:
+	"""Load the saved preprocessed dataset splits."""
+	train = load_from_disk(str(PREPROCESSED_DATA_DIR / "train"))
+	val = load_from_disk(str(PREPROCESSED_DATA_DIR / "val"))
+	test = load_from_disk(str(PREPROCESSED_DATA_DIR / "test"))
 
 	return train, val, test
