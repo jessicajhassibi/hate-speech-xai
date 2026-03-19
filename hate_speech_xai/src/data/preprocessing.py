@@ -36,7 +36,7 @@ def aggregate_rationales(annotators_rationales: list):
 	return np.array(padded_rationales).max(axis=0)
 
 def reconstruct_post(tokens: list):
-	"""Reconstruct the original post text from the token list."""
+	"""Reconstructs the original post text from the token list."""
 	return " ".join(tokens)
 
 
@@ -83,7 +83,7 @@ _PREPROCESSED_COLUMNS_TO_REMOVE = ["text", "rationale"]
 
 
 def preprocess_dataset(train: Dataset, val: Dataset, test: Dataset) -> Tuple[Dataset, Dataset, Dataset]:
-	"""Annotation-level preprocessing on raw dataset splits."""
+	"""Performs annotation-level preprocessing on raw dataset splits."""
 	train = train.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
 	val = val.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
 	test = test.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
@@ -92,7 +92,7 @@ def preprocess_dataset(train: Dataset, val: Dataset, test: Dataset) -> Tuple[Dat
 
 
 def tokenize_dataset(train: Dataset, val: Dataset) -> Tuple[Dataset, Dataset]:
-	"""Tokenize preprocessed dataset for training."""
+	"""Tokenizes preprocessed dataset for training."""
 	train = train.map(tokenize_post, remove_columns=_PREPROCESSED_COLUMNS_TO_REMOVE)
 	val = val.map(tokenize_post, remove_columns=_PREPROCESSED_COLUMNS_TO_REMOVE)
 
@@ -100,7 +100,7 @@ def tokenize_dataset(train: Dataset, val: Dataset) -> Tuple[Dataset, Dataset]:
 
 
 def load_preprocessed_dataset() -> Tuple[Dataset, Dataset, Dataset]:
-	"""Load the saved preprocessed dataset splits."""
+	"""Loads the saved preprocessed dataset splits."""
 	if not PREPROCESSED_DATA_DIR.exists():
 		raise FileNotFoundError(
 			f"Preprocessed dataset not found at {PREPROCESSED_DATA_DIR}. "
