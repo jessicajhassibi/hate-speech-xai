@@ -19,18 +19,6 @@ def render_label_badge(label_name):
     return html
 
 
-def render_speech_bubble(text, dark_bg=False):
-    if dark_bg:
-        return text
-    html = (
-        f'<div style="background-color: white; color: #333 !important; '
-        f'border: 1px solid #d0d0d0; border-left: 3px solid #888; '
-        f'padding: 12px 18px; border-radius: 6px; max-width: 80%; '
-        f'line-height: 1.5; margin: 4px 0;">'
-        f'{text}</div>'
-    )
-    return html
-
 
 def render_rationale(tokens, rationale):
     parts = []
@@ -43,6 +31,8 @@ def render_rationale(tokens, rationale):
 
 
 def render_photo_credit():
+    """For the "dark" theme we use a free photo from Unsplash. We need to give credit to the photographer."""
+
     st.markdown(
         '<div style="position: fixed; bottom: 10px; right: 15px; font-size: 12px; color: white; opacity: 0.7;">'
         'Photo by <a href="https://unsplash.com/@adrienolichon" target="_blank" style="color: white;">Adrien Olichon</a>'
@@ -51,8 +41,8 @@ def render_photo_credit():
     )
 
 
-def apply_theme(theme: str):
-    """Applies the theme with custom CSS. For the dark theme, we use a background image and adjust colors for better contrast."""
+def apply_theme(theme):
+    """Applies the chosen theme with custom CSS."""
     if theme == "Dark":
         _apply_dark_theme()
     else:
@@ -60,6 +50,9 @@ def apply_theme(theme: str):
 
 
 def _apply_dark_theme():
+    """Basically, it applies a dark background picture (can be switched) and changes all the fonts in the elements to white so we have an appropriate contrast.
+    Also the box backgrounds needed to be transparent and some other details."""
+
     image_path = DATA_DIR / "background.jpg"
     with open(image_path, "rb") as f:
         image_data = base64.b64encode(f.read()).decode()
@@ -88,7 +81,6 @@ def _apply_dark_theme():
         padding: 2rem 2.5rem;
     }}
 
-    /* Make all text white */
     h1, h2, h3, h4, h5, h6, p, div, label, span, li {{
         color: white !important;
     }}
@@ -131,9 +123,10 @@ def _apply_dark_theme():
         fill: white !important;
     }}
 
-    [data-baseweb="popover"] span,
-    [data-baseweb="popover"] li,
-    [data-baseweb="popover"] div {{
+    /* Dropdown menu items */
+    [data-baseweb="popover"] li span,
+    [data-baseweb="popover"] li div,
+    [data-baseweb="popover"] ul span {{
         color: black !important;
     }}
 
@@ -151,6 +144,8 @@ def _apply_dark_theme():
 
 
 def _apply_professional_theme():
+    """Applies custom colors and other details for the professional theme."""
+
     css = """
     <style>
     header {
@@ -177,7 +172,6 @@ def _apply_professional_theme():
         color: #2d2d44 !important;
         font-weight: 600 !important;
     }
-
     p, div, label, span, li {
         color: #333 !important;
     }
@@ -220,12 +214,6 @@ def _apply_professional_theme():
     }
     [data-baseweb="select"] svg {
         fill: #333 !important;
-    }
-
-    [data-baseweb="popover"] span,
-    [data-baseweb="popover"] li,
-    [data-baseweb="popover"] div {
-        color: #333 !important;
     }
 
     [data-baseweb="tag"] {

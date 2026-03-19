@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 
 from hate_speech_xai.app.styling import (
 	THEMES, apply_theme, render_label_badge, render_rationale,
-	render_speech_bubble, render_photo_credit,
+	render_photo_credit,
 )
 from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
@@ -28,9 +28,8 @@ selected_splits = st.multiselect(
 	"Filter by dataset split",
 	list(splits.keys()),
 	default=list(splits.keys()),
-	help="For exploring the dataset To evaluate the classifier's real performance, you should select only the Test set, becausex "
-		 "the model has never seen these samples during training.",
 )
+st.info("To evaluate the classifier's real performance, select only the Test set — the model has never seen these samples during training.")
 
 if not selected_splits:
 	st.warning("Select at least one split.")
@@ -85,11 +84,10 @@ example = splits[split_name][post_idx]
 st.subheader("Post Tokens")
 tokens = example["post_tokens"]
 text = " ".join(tokens)
-st.markdown(render_speech_bubble(text, dark_bg=(theme == "Dark")), unsafe_allow_html=True)
+st.write(text)
 
-st.subheader("Ground Truth (Majority Label)", help="The most common label assigned by annotators is used as the "
-											   "ground truth for this post. There are 3 possible labels: "
-											   "hate speech, offensive, and normal")
+st.subheader("Ground Truth (Majority Label)")
+st.info("The most common label assigned by annotators is used as the ground truth. Labels: hate speech, offensive, normal.")
 ground_truth_id = get_majority_label(example["annotators"]["label"])
 st.markdown(render_label_badge(LABELS[ground_truth_id]), unsafe_allow_html=True)
 
