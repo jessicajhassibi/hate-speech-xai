@@ -1,8 +1,17 @@
-.PHONY: install app
+.PHONY: install preprocess train evaluate app
 
 install:
-	 pip install -r requirements.txt
-	 pip install -e .
+	pip install -r requirements.txt
+	pip install -e .
+
+preprocess:
+	python -m hate_speech_xai.scripts.run_preprocessing
+
+train:
+	python -m hate_speech_xai.scripts.run_training
+
+evaluate:
+	python -m hate_speech_xai.scripts.run_evaluation
 
 app:
 	streamlit run hate_speech_xai/app/app.py

@@ -24,13 +24,21 @@ Used in the following paper:
   year={2021}
 }
 
-## Running the project 
+## Running the project
+> **Note:** The preprocessed data and trained model are already provided, you don't need to run the whole pipeline again. Only need to install the dependencies and start the app. The preprocessing, training, and evaluation steps can be skipped.
+
 ### Option A: using Makefile
 #### Installation of dependencies
 `make install`
 #### Accessing the data
 The dataset is accessed via Hugging Face: [Link to data](https://huggingface.co/datasets/Hate-speech-CNERG/hatexplain).
 There is no need to download it manually. The `datasets` library will handle the download and caching of the dataset when you run the app for the first time.
+#### Preprocessing the data
+`make preprocess`
+#### Training the model
+`make train`
+#### Evaluating the model
+`make evaluate`
 #### Starting the app
 `make app`
 
@@ -38,6 +46,9 @@ There is no need to download it manually. The `datasets` library will handle the
 ```
 pip install -r requirements.txt
 pip install -e .
+python -m hate_speech_xai.scripts.run_preprocessing
+python -m hate_speech_xai.scripts.run_training
+python -m hate_speech_xai.scripts.run_evaluation
 streamlit run hate_speech_xai/app/app.py
 ```
 
