@@ -10,37 +10,29 @@ from hate_speech_xai.config import MODEL_NAME, MAX_LENGTH, TRUNCATION, PADDING, 
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
-def get_majority_label(annotators_labels: list):
+def get_majority_label(annotators_labels: list) -> int:
 	"""We agree on the most common label the annotators assigned to the post as the
 	"ground truth" label for this post.
 	If all labels are different, the first one in the list is chosen as the majority label.
 	"""
 	return Counter(annotators_labels).most_common(1)[0][0]
 
-def aggregate_rationales(annotators_rationales: list):
+def aggregate_rationales(annotators_rationales: list) -> np.ndarray:
 	"""We take the union of all rationales across annotators as the "ground truth" rationale for this post.
-	Assuming that if any annotator marked a token, it is really potentially important.
+	Assuming that if any annotator marked a token, it is potentially important.
 	"""
 	if not annotators_rationales or len(annotators_rationales) == 0:
 		return np.array([])
 
-	# Find the maximum length among all rationales (in case annotators marked different lengths)
-	max_length = max(len(rat) for rat in annotators_rationales)
+	# max across first axis (=rows). Means to take the max across annotators for each token position
+	return np.array(annotators_rationales).max(axis=0)
 
-	# Pad all rationales to the same length with zeros
-	padded_rationales = []
-	for rat in annotators_rationales:
-		padded = list(rat) + [0] * (max_length - len(rat))
-		padded_rationales.append(padded)
-
-	return np.array(padded_rationales).max(axis=0)
-
-def reconstruct_post(tokens: list):
+def reconstruct_post(tokens: list) -> str:
 	"""Reconstructs the original post text from the token list."""
 	return " ".join(tokens)
 
 
-def preprocess_post(post: dict):
+def preprocess_post(post: dict) -> dict:
 	"""Annotation-level preprocessing: majority label, aggregated rationales, joined text."""
 	label = get_majority_label(post["annotators"]["label"])
 	rationale = aggregate_rationales(post["rationales"])
