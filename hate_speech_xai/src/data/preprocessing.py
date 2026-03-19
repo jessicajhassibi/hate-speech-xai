@@ -101,6 +101,12 @@ def tokenize_dataset(train: Dataset, val: Dataset) -> Tuple[Dataset, Dataset]:
 
 def load_preprocessed_dataset() -> Tuple[Dataset, Dataset, Dataset]:
 	"""Load the saved preprocessed dataset splits."""
+	if not PREPROCESSED_DATA_DIR.exists():
+		raise FileNotFoundError(
+			f"Preprocessed dataset not found at {PREPROCESSED_DATA_DIR}. "
+			"Run run_preprocessing.py first."
+		)
+
 	train = load_from_disk(str(PREPROCESSED_DATA_DIR / "train"))
 	val = load_from_disk(str(PREPROCESSED_DATA_DIR / "val"))
 	test = load_from_disk(str(PREPROCESSED_DATA_DIR / "test"))
