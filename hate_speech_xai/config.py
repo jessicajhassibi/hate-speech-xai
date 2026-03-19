@@ -3,7 +3,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent
 SAVED_MODELS_DIR = Path(BASE_DIR) / "models/hatexplain_classifier"
 CHECKPOINT_DIR = Path(BASE_DIR) / "checkpoints"
-DATA_DIR = Path(BASE_DIR) / "data"
+APP_DATA_DIR = Path(BASE_DIR) / "app/data"
 
 # Labels in HateXplain
 LABELS = {

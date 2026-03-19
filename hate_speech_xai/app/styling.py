@@ -2,7 +2,7 @@ import base64
 
 import streamlit as st
 
-from hate_speech_xai.config import DATA_DIR
+from hate_speech_xai.config import APP_DATA_DIR
 
 THEMES = ["Professional", "Dark"]
 
@@ -53,7 +53,7 @@ def _apply_dark_theme():
     """Basically, it applies a dark background picture (can be switched) and changes all the fonts in the elements to white so we have an appropriate contrast.
     Also the box backgrounds needed to be transparent and some other details."""
 
-    image_path = DATA_DIR / "background.jpg"
+    image_path = APP_DATA_DIR / "background.jpg"
     with open(image_path, "rb") as f:
         image_data = base64.b64encode(f.read()).decode()
 
