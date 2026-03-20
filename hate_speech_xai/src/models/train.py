@@ -13,7 +13,7 @@ def compute_metrics(eval_pred):
     return {"f1": f1, "accuracy": acc}
 
 
-def train_transformer(train, val):
+def train_transformer(train, val, training_args=TRAINING_ARGS, save_dir=SAVED_MODELS_DIR):
     model = AutoModelForSequenceClassification.from_pretrained(
         MODEL_NAME,
         num_labels=NUM_LABELS
@@ -22,13 +22,13 @@ def train_transformer(train, val):
 
     trainer = Trainer(
         model=model,
-        args=TrainingArguments(**TRAINING_ARGS),
+        args=TrainingArguments(**training_args),
         train_dataset=train,
         eval_dataset=val,
         processing_class=tokenizer,
         compute_metrics=compute_metrics
     )
     trainer.train()
-    trainer.save_model(SAVED_MODELS_DIR)
-    tokenizer.save_pretrained(SAVED_MODELS_DIR)
-    trainer.state.save_to_json(SAVED_MODELS_DIR / "trainer_state.json")
+    trainer.save_model(save_dir)
+    tokenizer.save_pretrained(save_dir)
+    trainer.state.save_to_json(save_dir / "trainer_state.json")
