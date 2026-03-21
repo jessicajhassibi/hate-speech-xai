@@ -2,7 +2,7 @@
 # Explainabile AI on Hate Speech Detection
 
 This repository contains the code and experiments for an Explainable AI (XAI) study on a Hate Speech dataset. I
-The report is currently being written under [this link](https://www.overleaf.com/read/bvdccnjzcstc#da316e)
+The report is currently being written under [this link](https://sharelatex.tu-darmstadt.de/read/ygjkwnvqbytr#9f0b95)
 
 ## What are we doing here?
 We are interested in understanding the decision-making process of a hate speech detection model. 
