@@ -17,15 +17,30 @@ def get_majority_label(annotators_labels: list) -> int:
 	"""
 	return Counter(annotators_labels).most_common(1)[0][0]
 
-def aggregate_rationales(annotators_rationales: list) -> np.ndarray:
-	"""We take the union of all rationales across annotators as the "ground truth" rationale for this post.
-	Assuming that if any annotator marked a token, it is potentially important.
+def aggregate_rationales(annotators_rationales: list, label: int, temperature: float = 5.0) -> np.ndarray:
+	"""Aggregate annotator rationales into a ground truth attention distribution.
+	Following Mathew et al. (2021):
+	- For hate/offensive posts: average the rationale vectors, then apply temperature-scaled softmax
+	- For normal posts: use a uniform distribution (1/sentence_length)
 	"""
 	if not annotators_rationales or len(annotators_rationales) == 0:
 		return np.array([])
 
-	# max across first axis (=rows). Means to take the max across annotators for each token position
-	return np.array(annotators_rationales).max(axis=0)
+	# Pad rationales to the same length in case of mismatched lengths (present in the data!)
+	max_length = max(len(rat) for rat in annotators_rationales)
+	padded = [list(rat) + [0] * (max_length - len(rat)) for rat in annotators_rationales]
+
+	# Normal posts get uniform attention
+	if label == 1:
+		return np.full(max_length, 1.0 / max_length)
+
+	# Average across annotators
+	avg_rationale = np.array(padded, dtype=float).mean(axis=0)
+
+	# Temperature-scaled softmax
+	scaled = avg_rationale * temperature
+	exp = np.exp(scaled - np.max(scaled))  # subtract max for numerical stability
+	return exp / exp.sum()
 
 def reconstruct_post(tokens: list) -> str:
 	"""Reconstructs the original post text from the token list."""
@@ -33,9 +48,9 @@ def reconstruct_post(tokens: list) -> str:
 
 
 def preprocess_post(post: dict) -> dict:
-	"""Annotation-level preprocessing: majority label, aggregated rationales, joined text."""
+	"""Performs preprocessing steps: majority label, aggregated rationales, joined text."""
 	label = get_majority_label(post["annotators"]["label"])
-	rationale = aggregate_rationales(post["rationales"])
+	rationale = aggregate_rationales(post["rationales"], label)
 	text = reconstruct_post(post["post_tokens"])
 
 	return {
@@ -60,9 +75,9 @@ def tokenize_post(post: dict):
 
 	for word_id in word_ids:
 		if word_id is None or word_id >= len(rationale):
-			token_rationale.append(0)
+			token_rationale.append(0.0)
 		else:
-			token_rationale.append(int(rationale[word_id]))
+			token_rationale.append(float(rationale[word_id]))
 
 	encoding["labels"] = post["label"]
 	encoding["rationale_mask"] = token_rationale
@@ -75,10 +90,21 @@ _PREPROCESSED_COLUMNS_TO_REMOVE = ["text", "rationale"]
 
 
 def preprocess_dataset(train: Dataset, val: Dataset, test: Dataset) -> Tuple[Dataset, Dataset, Dataset]:
-	"""Performs annotation-level preprocessing on raw dataset splits."""
+	"""Performs preprocessing on raw dataset splits.
+	"""
+	if PREPROCESSED_DATA_DIR.exists():
+		print("Loading already existing preprocessed dataset from disk...")
+		return load_preprocessed_dataset()
+
 	train = train.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
 	val = val.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
 	test = test.map(preprocess_post, remove_columns=_RAW_COLUMNS_TO_REMOVE)
+
+	PREPROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+	train.save_to_disk(str(PREPROCESSED_DATA_DIR / "train"))
+	val.save_to_disk(str(PREPROCESSED_DATA_DIR / "val"))
+	test.save_to_disk(str(PREPROCESSED_DATA_DIR / "test"))
+	print(f"Saved preprocessed dataset to {PREPROCESSED_DATA_DIR}")
 
 	return train, val, test
 

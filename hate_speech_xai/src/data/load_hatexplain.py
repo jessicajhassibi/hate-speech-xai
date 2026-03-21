@@ -1,6 +1,6 @@
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 
-def load_hatexplain_dataset():
+def load_hatexplain_dataset() -> tuple[Dataset, Dataset, Dataset]:
     """
     Load the HateXplain dataset from Hugging Face.
     Returns train, validation, and test splits.
