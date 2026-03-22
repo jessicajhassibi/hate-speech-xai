@@ -19,8 +19,9 @@ st.set_page_config(layout="wide")
 theme = st.sidebar.selectbox("Theme", THEMES, label_visibility="collapsed")
 apply_theme(theme)
 
-st.title("Hate Speech XAI")
-
+st.title("Explainable AI for Hate Speech Detection")
+st.caption("Practical Project made by Jessica Hassibi, Winter Semester 2025/26 for the Practical Course AI and Security by TU Darmstadt "
+		   "and the Fraunhofer SIT of Darmstadt.")
 st.caption("This project is based on and builds upon the research of [Mathew et al., 2021](https://doi.org/10.1609/aaai.v35i17.17745)")
 
 st.subheader("HateXplain Dataset Explorer")
@@ -226,7 +227,10 @@ with st.expander("How do these explanation methods work?"):
 		"Tokens that receive more attention are considered more important for the prediction.\n"
 		"- **Integrated Gradients**: A gradient-based attribution method that computes the importance of each token "
 		"by accumulating gradients along a path from a neutral baseline (zero embedding) to the actual input. "
-		"This captures how much each token contributes to the predicted class."
+		"This captures how much each token contributes to the predicted class.\n"
+		"- **SHAP**: Based on Shapley values from game theory. Treats each token as a 'player' and measures "
+		"its contribution to the prediction by systematically masking tokens and observing how the output changes. "
+		"Unlike the other methods, SHAP is model-agnostic — it doesn't rely on model internals."
 	)
 
 st.markdown("#### Model Evaluation on Test Set")
