@@ -42,8 +42,8 @@ def aggregate_rationales(annotators_rationales: list, label: int, temperature: f
 	exp = np.exp(scaled - np.max(scaled))  # subtract max for numerical stability
 	return exp / exp.sum()
 
-def reconstruct_post(tokens: list) -> str:
-	"""Reconstructs the original post text from the token list."""
+def get_post_as_str(tokens: list) -> str:
+	"""Returns the post text from the token list."""
 	return " ".join(tokens)
 
 
@@ -51,7 +51,7 @@ def preprocess_post(post: dict) -> dict:
 	"""Performs preprocessing steps: majority label, aggregated rationales, joined text."""
 	label = get_majority_label(post["annotators"]["label"])
 	rationale = aggregate_rationales(post["rationales"], label)
-	text = reconstruct_post(post["post_tokens"])
+	text = get_post_as_str(post["post_tokens"])
 
 	return {
 		"text": text,

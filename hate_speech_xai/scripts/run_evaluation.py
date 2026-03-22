@@ -1,6 +1,6 @@
 import json
 from hate_speech_xai.config import SAVED_MODELS_DIR, SAVED_MODELS_V2_DIR
-from hate_speech_xai.src.data.preprocessing import load_preprocessed_dataset
+from hate_speech_xai.src.data.preprocess import load_preprocessed_dataset
 from hate_speech_xai.src.models.predict import predict_label
 
 

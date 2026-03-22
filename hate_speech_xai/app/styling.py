@@ -77,7 +77,7 @@ def _apply_dark_theme():
     .block-container {{
         background-color: rgba(0, 0, 0, 0.2);
         border-radius: 15px;
-        max-width: 900px;
+        max-width: 1200px;
         padding: 2rem 2.5rem;
     }}
 
@@ -138,6 +138,11 @@ def _apply_dark_theme():
         color: black !important;
         fill: black !important;
     }}
+
+    /* Info boxes: width should match the content width*/
+    .stAlert {{
+        width: fit-content !important;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -160,7 +165,7 @@ def _apply_professional_theme():
         background: linear-gradient(160deg, #f0f2f5 0%, #e8ecf1 50%, #f0f2f5 100%);
     }
     .block-container {
-        max-width: 900px;
+        max-width: 1200px;
         padding: 2rem 2.5rem;
     }
 
@@ -225,6 +230,11 @@ def _apply_professional_theme():
     }
     [data-baseweb="tag"] svg {
         fill: #666 !important;
+    }
+
+    /* Info boxes: fit content width */
+    .stAlert {
+        width: fit-content !important;
     }
     </style>
     """

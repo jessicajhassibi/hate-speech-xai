@@ -1,4 +1,4 @@
-from hate_speech_xai.src.data.preprocessing import load_preprocessed_dataset, tokenize_dataset
+from hate_speech_xai.src.data.preprocess import load_preprocessed_dataset, tokenize_dataset
 from hate_speech_xai.src.models.train import train_transformer
 
 
