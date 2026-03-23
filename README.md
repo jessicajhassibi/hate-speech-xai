@@ -36,8 +36,9 @@ Also the Dockerfile is provided in the zip file, so no need to publish it to Doc
 ### Option A: Docker
 > **Note:** If you just want to run the app, you can do this with Docker without having to install the dependencies.
 Needs [Docker](https://www.docker.com/) to be installed on your system. 
+Also you need to add the Docker CLI in system PATH in the advanced settings in Docker Desktop.
 ```
-docker build -t hate-speech-xai .
+docker build -t hate-speech-xai . 
 docker run -p 8501:8501 hate-speech-xai
 ```
 The app starts at http://localhost:8501 in your browser.
