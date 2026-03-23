@@ -43,7 +43,6 @@ def aggregate_rationales(annotators_rationales: list, label: int, temperature: f
 	return exp / exp.sum()
 
 def get_post_as_str(tokens: list) -> str:
-	"""Returns the post text from the token list."""
 	return " ".join(tokens)
 
 

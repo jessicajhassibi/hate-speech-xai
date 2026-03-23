@@ -3,7 +3,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent
 SAVED_MODELS_DIR = Path(BASE_DIR) / "models/hatexplain_classifier"
 SAVED_MODELS_V2_DIR = Path(BASE_DIR) / "models/hatexplain_classifier_v2"
-CHECKPOINT_DIR = Path(BASE_DIR) / "checkpoints"
+CHECKPOINT_DIR = Path(BASE_DIR) / "checkpoints" # checkpoints are not included in the .zip file handed in as well as in the git repository
 CHECKPOINT_V2_DIR = Path(BASE_DIR) / "checkpoints_v2"
 APP_DATA_DIR = Path(BASE_DIR) / "app/data"
 PREPROCESSED_DATA_DIR = Path(BASE_DIR) / "data/preprocessed"
@@ -35,8 +35,9 @@ TRAINING_ARGS = {
     "load_best_model_at_end": True,
     "metric_for_best_model": "f1",
     "save_total_limit": 2
-} # using standard huggingface arguments
+}
 
+# a second configuration was tried with not really better results
 TRAINING_ARGS_V2 = {
 	"output_dir": CHECKPOINT_V2_DIR,
     "num_train_epochs": 8,
