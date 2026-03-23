@@ -89,12 +89,6 @@ def _apply_dark_theme():
         background-color: rgba(255, 255, 255, 0.2);
         color: white !important;
         border: 1px solid white;
-        border-radius: 5px;
-        padding: 10px 20px;
-        font-weight: bold;
-    }}
-    .stButton > button:hover {{
-        background-color: rgba(255, 255, 255, 0.3);
     }}
     .stButton > button span {{
         color: white !important;
@@ -105,10 +99,6 @@ def _apply_dark_theme():
         color: black !important;
         -webkit-text-fill-color: black !important;
         border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    }}
-
-    .stSlider [data-baseweb="slider"] {{
-        background: rgba(255, 255, 255, 0.2);
     }}
 
     [data-baseweb="select"] > div {{
@@ -123,22 +113,12 @@ def _apply_dark_theme():
         fill: white !important;
     }}
 
-    /* Dropdown menu items */
     [data-baseweb="popover"] li span,
     [data-baseweb="popover"] li div,
     [data-baseweb="popover"] ul span {{
         color: black !important;
     }}
-
-    [data-baseweb="tag"] {{
-        background-color: rgba(255, 255, 255, 0.85) !important;
-    }}
-    [data-baseweb="tag"] span,
-    [data-baseweb="tag"] svg {{
-        color: black !important;
-        fill: black !important;
-    }}
-
+    
     /* Info boxes: width should match the content width*/
     .stAlert {{
         width: fit-content !important;
@@ -181,55 +161,9 @@ def _apply_professional_theme():
         color: #333 !important;
     }
 
-    .stButton > button {
-        background-color: white;
-        color: #333 !important;
-        border: 1px solid #d0d0d0;
-        border-radius: 8px;
-        padding: 10px 24px;
-        font-weight: 600;
-    }
-    .stButton > button span {
-        color: #333 !important;
-    }
-    .stButton > button:hover {
-        background-color: #f0f0f0;
-        border-color: #999;
-    }
-
     textarea, input[type="text"] {
         background-color: white !important;
         color: #333 !important;
-        border: 1px solid #d0d0d0 !important;
-        border-radius: 8px !important;
-    }
-
-    .stSlider [data-baseweb="slider"] {
-        background: #e0e0e0;
-    }
-
-    [data-baseweb="select"] > div {
-        background-color: white !important;
-        border: 1px solid #d0d0d0 !important;
-        border-radius: 8px !important;
-    }
-    [data-baseweb="select"] span,
-    [data-baseweb="select"] div {
-        color: #333 !important;
-    }
-    [data-baseweb="select"] svg {
-        fill: #333 !important;
-    }
-
-    [data-baseweb="tag"] {
-        background-color: #e8ecf1 !important;
-        border-radius: 6px !important;
-    }
-    [data-baseweb="tag"] span {
-        color: #333 !important;
-    }
-    [data-baseweb="tag"] svg {
-        fill: #666 !important;
     }
 
     /* Info boxes: fit content width */
