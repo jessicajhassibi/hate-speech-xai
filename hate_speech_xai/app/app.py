@@ -11,13 +11,22 @@ from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
 from hate_speech_xai.src.data.preprocess import get_majority_label, get_post_as_str
 from hate_speech_xai.src.data.analyze import compute_label_distribution
-from hate_speech_xai.src.models.evaluate import load_evaluation_results, get_classification_report, plot_confusion_matrix
+from hate_speech_xai.src.models.evaluate import load_evaluation_results, load_xai_evaluation_results, get_classification_report, plot_confusion_matrix
 from hate_speech_xai.src.models.predict import predict_label
 from hate_speech_xai.src.models.explain import EXPLANATION_METHODS
 
 st.set_page_config(layout="wide")
+st.sidebar.markdown("### Choose Theme")
 theme = st.sidebar.selectbox("Theme", THEMES, label_visibility="collapsed")
 apply_theme(theme)
+
+st.sidebar.markdown("### Navigation")
+st.sidebar.markdown("""
+- [Dataset Explorer](#hatexplain-dataset-explorer)
+- [Post Explorer](#post-explorer)
+- [Hate Speech Classifier](#hate-speech-classifier)
+- [Model Evaluation](#model-evaluation-on-test-set)
+""")
 
 st.title("Explainable AI for Hate Speech Detection")
 st.caption("Practical Project made by Jessica Hassibi, Winter Semester 2025/26 for the Practical Course AI and Security by TU Darmstadt "
@@ -222,8 +231,9 @@ st.pyplot(fig)
 
 with st.expander("How do these explanation methods work?"):
 	st.markdown(
-		"- **Attention (Last Layer)**: Extracts the attention weights from the last transformer layer, "
-		"specifically how much the [CLS] token attends to each input token, averaged across all attention heads. "
+		"- **Attention**: Used as baseline. The attention weights are extracted from the last layer of the model. "
+		"This shows how much the [CLS] token attends to each token from the post from the input, "
+		" averaged across all attention heads. "
 		"Tokens that receive more attention are considered more important for the prediction.\n"
 		"- **Integrated Gradients**: A gradient-based attribution method that computes the importance of each token "
 		"by accumulating gradients along a path from a neutral baseline (zero embedding) to the actual input. "
@@ -281,7 +291,29 @@ with metrics_col1:
 with metrics_col2:
 	st.write("**Confusion Matrix**")
 	fig = plot_confusion_matrix(y_true, y_pred)
-	st.pyplot(fig)
+	st.pyplot(fig, use_container_width=False) # avoid plot to be super big
+
+st.write("**Explainability metrics**")
+st.info("How well do the explanation methods match the ground truth rationales from the dataset?")
+
+with st.expander("What do these metrics mean?"):
+	st.markdown(
+		"- **Top-k Overlap**: Of the top-k tokens the method considers most important, "
+		"how many match the ground truth rationale tokens? (k = number of rationale tokens)"
+	)
+
+xai_results = load_xai_evaluation_results()
+if xai_results is None:
+	st.warning("XAI evaluation results not found. Run `make evaluate-xai` first.")
+else:
+	xai_rows = []
+	for r in xai_results:
+		xai_rows.append({
+			"Method": r["method"],
+			"Top-k Overlap": f"{r['top_k_overlap']:.2%}" if r["top_k_overlap"] else "—",
+			"Samples": r["n_samples"],
+		})
+	st.table(xai_rows)
 
 if theme == "Dark":
 	render_photo_credit()

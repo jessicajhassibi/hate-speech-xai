@@ -77,7 +77,7 @@ def _apply_dark_theme():
     .block-container {{
         background-color: rgba(0, 0, 0, 0.2);
         border-radius: 15px;
-        max-width: 1200px;
+        max-width: 1400px;
         padding: 2rem 2.5rem;
     }}
 
@@ -145,7 +145,7 @@ def _apply_professional_theme():
         background: linear-gradient(160deg, #f0f2f5 0%, #e8ecf1 50%, #f0f2f5 100%);
     }
     .block-container {
-        max-width: 1200px;
+        max-width: 1400px;
         padding: 2rem 2.5rem;
     }
 

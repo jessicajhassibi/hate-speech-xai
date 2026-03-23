@@ -19,6 +19,15 @@ def load_evaluation_results(source=SAVED_MODELS_DIR):
 	return eval_results["y_true"], eval_results["y_pred"]
 
 
+def load_xai_evaluation_results(source=SAVED_MODELS_DIR):
+	"""Load saved XAI evaluation results from JSON."""
+	eval_path = source / "xai_evaluation.json"
+	if not eval_path.exists():
+		return None
+	with open(eval_path) as f:
+		return json.load(f)
+
+
 def get_classification_report(y_true, y_pred):
 	"""Return overall metrics and per-class classification report."""
 	acc = accuracy_score(y_true, y_pred)
@@ -30,7 +39,7 @@ def get_classification_report(y_true, y_pred):
 def plot_confusion_matrix(y_true, y_pred):
 	"""Create and return a confusion matrix figure."""
 	cm = confusion_matrix(y_true, y_pred)
-	fig, ax = plt.subplots(figsize=(5, 4))
+	fig, ax = plt.subplots(figsize=(3.5, 3))
 	sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=label_names, yticklabels=label_names, ax=ax)
 	ax.set_xlabel("Predicted")
 	ax.set_ylabel("Actual")
