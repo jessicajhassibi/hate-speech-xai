@@ -227,10 +227,7 @@ with st.expander("How do these explanation methods work?"):
 		"Tokens that receive more attention are considered more important for the prediction.\n"
 		"- **Integrated Gradients**: A gradient-based attribution method that computes the importance of each token "
 		"by accumulating gradients along a path from a neutral baseline (zero embedding) to the actual input. "
-		"This captures how much each token contributes to the predicted class.\n"
-		"- **SHAP**: Based on Shapley values from game theory. Treats each token as a 'player' and measures "
-		"its contribution to the prediction by systematically masking tokens and observing how the output changes. "
-		"Unlike the other methods, SHAP is model-agnostic — it doesn't rely on model internals."
+		"This captures how much each token contributes to the predicted class."
 	)
 
 st.markdown("#### Model Evaluation on Test Set")

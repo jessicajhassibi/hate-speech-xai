@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from captum.attr import IntegratedGradients
 
 from hate_speech_xai.config import SAVED_MODELS_DIR
 
@@ -60,7 +61,6 @@ def explain_integrated_gradients(text: str, source=SAVED_MODELS_DIR):
 	embedding layer. Attributes importance to each token embedding,
 	then sums across the embedding dimension to get per-token scores.
 	"""
-	from captum.attr import IntegratedGradients
 
 	tokenizer, model = load_model_for_explanation(source)
 	inputs = tokenizer(text, return_tensors="pt", truncation=True)
