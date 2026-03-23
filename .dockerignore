@@ -1,0 +1,7 @@
+venv/
+.git/
+__pycache__/
+*.egg-info/
+.devcontainer/
+hate_speech_xai/checkpoints/
+hate_speech_xai/checkpoints_v2/
