@@ -6,6 +6,7 @@ from hate_speech_xai.config import APP_DATA_DIR
 
 THEMES = ["Professional", "Dark"]
 
+# Use the same colors for the labels throughout the app
 LABEL_COLORS = {
     "Hate speech": "#d32f2f",
     "Normal": "#388e3c",
@@ -42,7 +43,6 @@ def render_photo_credit():
 
 
 def apply_theme(theme):
-    """Applies the chosen theme with custom CSS."""
     if theme == "Dark":
         _apply_dark_theme()
     else:
