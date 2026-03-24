@@ -18,7 +18,7 @@ def get_majority_label(annotators_labels: list) -> int:
 	return Counter(annotators_labels).most_common(1)[0][0]
 
 def aggregate_rationales(annotators_rationales: list, label: int, temperature: float = 5.0) -> np.ndarray:
-	"""Aggregate annotator rationales into a ground truth attention distribution.
+	"""Aggregate annotator rationales for one post into a ground truth attention distribution.
 	Following Mathew et al. (2021):
 	- For hate/offensive posts: average the rationale vectors, then apply temperature-scaled softmax
 	- For normal posts: use a uniform distribution (1/sentence_length)
@@ -26,7 +26,7 @@ def aggregate_rationales(annotators_rationales: list, label: int, temperature: f
 	if not annotators_rationales or len(annotators_rationales) == 0:
 		return np.array([])
 
-	# Pad rationales to the same length in case of mismatched lengths (present in the data!)
+	# We have to pad rationales to the same length in case of mismatched lengths (present in the data!)
 	max_length = max(len(rat) for rat in annotators_rationales)
 	padded = [list(rat) + [0] * (max_length - len(rat)) for rat in annotators_rationales]
 
@@ -34,17 +34,15 @@ def aggregate_rationales(annotators_rationales: list, label: int, temperature: f
 	if label == 1:
 		return np.full(max_length, 1.0 / max_length)
 
-	# Average across annotators
 	avg_rationale = np.array(padded, dtype=float).mean(axis=0)
 
 	# Temperature-scaled softmax
-	scaled = avg_rationale * temperature
+	scaled = avg_rationale * temperature # different from the authors, we use a static temperature
 	exp = np.exp(scaled - np.max(scaled))  # subtract max for numerical stability
 	return exp / exp.sum()
 
 def get_post_as_str(tokens: list) -> str:
 	return " ".join(tokens)
-
 
 def preprocess_post(post: dict) -> dict:
 	"""Performs preprocessing steps: majority label, aggregated rationales, joined text."""
@@ -89,8 +87,6 @@ _PREPROCESSED_COLUMNS_TO_REMOVE = ["text", "rationale"]
 
 
 def preprocess_dataset(train: Dataset, val: Dataset, test: Dataset) -> Tuple[Dataset, Dataset, Dataset]:
-	"""Performs preprocessing on raw dataset splits.
-	"""
 	if PREPROCESSED_DATA_DIR.exists():
 		print("Loading already existing preprocessed dataset from disk...")
 		return load_preprocessed_dataset()
@@ -103,7 +99,6 @@ def preprocess_dataset(train: Dataset, val: Dataset, test: Dataset) -> Tuple[Dat
 	train.save_to_disk(str(PREPROCESSED_DATA_DIR / "train"))
 	val.save_to_disk(str(PREPROCESSED_DATA_DIR / "val"))
 	test.save_to_disk(str(PREPROCESSED_DATA_DIR / "test"))
-	print(f"Saved preprocessed dataset to {PREPROCESSED_DATA_DIR}")
 
 	return train, val, test
 
@@ -117,7 +112,6 @@ def tokenize_dataset(train: Dataset, val: Dataset) -> Tuple[Dataset, Dataset]:
 
 
 def load_preprocessed_dataset() -> Tuple[Dataset, Dataset, Dataset]:
-	"""Loads the saved preprocessed dataset splits."""
 	if not PREPROCESSED_DATA_DIR.exists():
 		raise FileNotFoundError(
 			f"Preprocessed dataset not found at {PREPROCESSED_DATA_DIR}. "

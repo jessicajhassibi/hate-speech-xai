@@ -9,7 +9,8 @@ from hate_speech_xai.app.styling import (
 )
 from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.load_hatexplain import load_hatexplain_dataset
-from hate_speech_xai.src.data.preprocess import get_majority_label, get_post_as_str
+from hate_speech_xai.src.data.preprocess import get_majority_label, get_post_as_str, aggregate_rationales
+from hate_speech_xai.src.models.evaluate_xai import top_k_overlap
 from hate_speech_xai.src.data.analyze import compute_label_distribution
 from hate_speech_xai.src.models.evaluate import load_evaluation_results, load_xai_evaluation_results, get_classification_report, plot_confusion_matrix
 from hate_speech_xai.src.models.predict import predict_label
@@ -73,7 +74,7 @@ with col_chart:
 	ax.set_title("Overall label distribution")
 	ax.set_ylim(0, overall.max() * 1.2)
 	fig.tight_layout()
-	st.pyplot(fig)
+	st.pyplot(fig, use_container_width=False)
 
 with col_table:
 	st.dataframe(pivot, width="stretch")
@@ -227,7 +228,7 @@ ax.set_yticks([])
 ax.set_xticks(range(len(display_tokens)))
 ax.set_xticklabels(display_tokens, rotation=45, ha="right")
 ax.set_title(f"Token-level Importance ({method_name})")
-st.pyplot(fig)
+st.pyplot(fig, use_container_width=False)
 
 with st.expander("How do these explanation methods work?"):
 	st.markdown(
@@ -314,6 +315,39 @@ else:
 			"Samples": r["n_samples"],
 		})
 	st.table(xai_rows)
+
+	st.write("**Comparison of XAI methods evaluation on the selected post from above**")
+
+	gt_rationale_eval = aggregate_rationales(example["rationales"], ground_truth_id)
+	gt_display_eval = gt_rationale_eval[:display_len]
+
+	fig_gt, ax_gt = plt.subplots(figsize=(10, 0.6))
+	ax_gt.imshow([gt_display_eval], cmap="Oranges", aspect="auto")
+	ax_gt.set_yticks([])
+	ax_gt.set_xticks(range(len(display_tokens)))
+	ax_gt.set_xticklabels(display_tokens, rotation=45, ha="right")
+	ax_gt.set_title("Ground Truth Rationale")
+	st.pyplot(fig_gt, use_container_width=False)
+
+	for r in xai_results:
+		method_name_eval = r["method"]
+		if method_name_eval not in EXPLANATION_METHODS:
+			continue
+		method_fn = EXPLANATION_METHODS[method_name_eval]
+		imp = method_fn(text)
+		imp_display = imp[:display_len]
+
+		fig, ax = plt.subplots(figsize=(10, 0.6))
+		ax.imshow([imp_display], cmap="Reds", aspect="auto")
+		ax.set_yticks([])
+		ax.set_xticks(range(len(display_tokens)))
+		ax.set_xticklabels(display_tokens, rotation=45, ha="right")
+		ax.set_title(f"{method_name_eval}")
+
+		tk_eval = top_k_overlap(imp, gt_rationale_eval)
+		if tk_eval is not None:
+			ax.set_title(f"{method_name_eval} — Top-k Overlap: {tk_eval:.2%}")
+		st.pyplot(fig, use_container_width=False)
 
 if theme == "Dark":
 	render_photo_credit()
