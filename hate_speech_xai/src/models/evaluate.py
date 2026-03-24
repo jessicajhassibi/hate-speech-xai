@@ -39,8 +39,13 @@ def get_classification_report(y_true, y_pred):
 def plot_confusion_matrix(y_true, y_pred):
 	"""Create and return a confusion matrix figure."""
 	cm = confusion_matrix(y_true, y_pred)
-	fig, ax = plt.subplots(figsize=(3.5, 3))
-	sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=label_names, yticklabels=label_names, ax=ax)
-	ax.set_xlabel("Predicted")
-	ax.set_ylabel("Actual")
+	fig, ax = plt.subplots(figsize=(2.8, 2.4))
+	sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=label_names, yticklabels=label_names, ax=ax,
+				annot_kws={"size": 8})
+	ax.set_xlabel("Predicted", fontsize=8)
+	ax.set_ylabel("Actual", fontsize=8)
+	ax.tick_params(labelsize=6)
+	colorbar = ax.collections[0].colorbar
+	colorbar.ax.tick_params(labelsize=6)
+	fig.tight_layout()
 	return fig
