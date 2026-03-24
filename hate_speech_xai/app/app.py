@@ -35,6 +35,7 @@ st.caption("Practical Project made by Jessica Hassibi, Winter Semester 2025/26 f
 st.caption("This project is based on and builds upon the research of [Mathew et al., 2021](https://doi.org/10.1609/aaai.v35i17.17745)")
 
 st.subheader("HateXplain Dataset Explorer")
+st.write("We will explore the HateXplain dataset, a benchmark for explainable hate speech detection.")
 
 train_ds, val_ds, test_ds = load_hatexplain_dataset()
 splits = {"Train": train_ds, "Validation": val_ds, "Test": test_ds}
@@ -42,6 +43,15 @@ splits = {"Train": train_ds, "Validation": val_ds, "Test": test_ds}
 st.markdown("#### Class Distribution")
 st.info("The dataset consists of posts, each labeled by 3 annotators as hate speech, offensive, or normal."
 		" It is split into 3 parts: Train, Validation, and Test.")
+st.expander("What is Hate Speech?").markdown(
+	"A definition by [Britannica](https://www.britannica.com/topic/hate-speech): *\"Hate speech is speech or expression that denigrates a person or persons on the basis of (alleged) membership "
+	"in a social group identified by attributes such as race, ethnicity, gender, sexual orientation, religion, age, "
+	"physical or mental disability, and others.\"*\n\n"
+	"Regarding the distinction from offensive speech, [DW Academy](https://akademie.dw.com/en/hate-speech-a-faq/a-19103744) puts it like this:"
+	"*\"Because there is no one definition of hate speech, it is sometimes difficult to judge what is just an offensive comment and what is hate speech."
+	" But basically a nasty comment about an individual isn’t hate speech, unless it targets that person as a member of a particular group.\"*"
+)
+
 
 @st.cache_data
 def get_label_distribution(_splits):
@@ -288,11 +298,29 @@ with metrics_col1:
 			"Support": int(report[label]['support']),
 		})
 	st.table(rows)
+	with st.expander("Interpretation"):
+		st.markdown(
+			"The model achieves comparable performance to Mathew et al. (2021)."
+			"We can see that the **Offensive** class is the hardest to classify with almost half of all offensive posts misclassified."
+			"**Hate speech** is classified more reliably, with the majority of errors being confusion with the Offensive class."
+			"**Normal** posts are predicted best overall, although a notable share is misclassified "
+			"as Offensive. This could be doue to sarcastic or ambiguous language. Deciding for a class in cases of doubt"
+			" when only judging a post based on the text without additional context like a persons gestures or tone of voice.\n\n"
+			"Future work could explore how model performance and quality of explanations change when there are only two "
+			"classes: toxic and normal. This could help with the problem that it’s hard (even for humans) to disambiguate "
+			"between hate speech and offensive speech."
+		)
 
 with metrics_col2:
 	st.write("**Confusion Matrix**")
 	fig = plot_confusion_matrix(y_true, y_pred)
 	st.pyplot(fig, use_container_width=False) # avoid plot to be super big
+	st.caption(
+		"Problem with the Offensive class: 25.7% of offensive posts are confused as Normal and 21.7% as Hate speech. "
+		"Similarly, 22.4% of Normal posts are incorrectly labeled Offensive."
+	)
+
+st.divider()
 
 st.write("**Explainability metrics**")
 st.info("How well do the explanation methods match the ground truth rationales from the dataset?")
@@ -315,8 +343,13 @@ else:
 			"Samples": r["n_samples"],
 		})
 	st.table(xai_rows)
+	st.caption(
+		"This evaluation is only based on 1,135 out of 1,924 test samples. "
+		"Excluded are posts labeled as **Normal** because their ground truth rationale is uniform "
+		", which makes a top-k overlap comparison meaningless."
+	)
 
-	st.write("**Comparison of XAI methods evaluation on the selected post from above**")
+	st.write("**Direct comparison of XAI methods evaluation on the selected post from above**")
 
 	gt_rationale_eval = aggregate_rationales(example["rationales"], ground_truth_id)
 	gt_display_eval = gt_rationale_eval[:display_len]
@@ -344,9 +377,9 @@ else:
 		ax.set_xticklabels(display_tokens, rotation=45, ha="right")
 		ax.set_title(f"{method_name_eval}")
 
-		tk_eval = top_k_overlap(imp, gt_rationale_eval)
-		if tk_eval is not None:
-			ax.set_title(f"{method_name_eval} — Top-k Overlap: {tk_eval:.2%}")
+		top_k_eval_result = top_k_overlap(imp, gt_rationale_eval)
+		if top_k_eval_result is not None:
+			ax.set_title(f"{method_name_eval} — Top-k Overlap: {top_k_eval_result:.2%}")
 		st.pyplot(fig, use_container_width=False)
 
 if theme == "Dark":
