@@ -70,8 +70,8 @@ htmlcov/
 .env
 
 # model artifacts
-models/
+hate_speech_xai/models/
 checkpoints/
 
 # preprocessed data
-data/
+hate_speech_xai/data/
