@@ -329,7 +329,6 @@ def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int,
 		xai_rows.append({
 			"Method": r["method"],
 			"Top-k Overlap": f"{r['top_k_overlap']:.2%}" if r["top_k_overlap"] else "—",
-			"Samples": r["n_samples"],
 		})
 	st.table(xai_rows)
 	st.caption(
