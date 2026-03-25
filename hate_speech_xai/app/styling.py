@@ -93,6 +93,14 @@ def _apply_dark_theme() -> None:
     .stButton > button span {{
         color: white !important;
     }}
+    .stDownloadButton > button {{
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white !important;
+        border: 1px solid white;
+    }}
+    .stDownloadButton > button span {{
+        color: white !important;
+    }}
 
     textarea, input {{
         background-color: rgba(255, 255, 255, 0.85) !important;
