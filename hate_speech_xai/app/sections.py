@@ -233,7 +233,10 @@ def explanations(text: str, tokens: list[str], example: dict, ground_truth_id: i
 			"Tokens that receive more attention are considered more important for the prediction.\n"
 			"- **Integrated Gradients**: A gradient-based attribution method that computes the importance of each token "
 			"by accumulating gradients along a path from a neutral baseline (zero embedding) to the actual input. "
-			"This captures how much each token contributes to the predicted class."
+			"This captures how much each token contributes to the predicted class.\n"
+		"- **SHAP**: Based on Shapley values from game theory. Treats each token as a 'player' and measures "
+		"its contribution to the prediction by systematically masking tokens and observing how the output changes. "
+		"SHAP is model-agnostic, since it doesn't rely on model internals."
 		)
 
 	return display_len, display_tokens

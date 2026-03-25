@@ -1,14 +1,16 @@
-from pathlib import Path
-
+import shap
 import torch
 import numpy as np
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+from pathlib import Path
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline, TextClassificationPipeline
 from captum.attr import IntegratedGradients
 
 from hate_speech_xai.config import SAVED_MODELS_DIR
 
 
 def load_model_for_explanation(source: Path = SAVED_MODELS_DIR) -> tuple[AutoTokenizer, AutoModelForSequenceClassification]:
+	"""Loads our fine-tuned tokenizer and model with output_attentions set to True."""
 	tokenizer = AutoTokenizer.from_pretrained(source)
 	model = AutoModelForSequenceClassification.from_pretrained(
 		source, output_attentions=True
@@ -66,8 +68,6 @@ def explain_integrated_gradients(text: str, source: Path = SAVED_MODELS_DIR) -> 
 	tokenizer, model = load_model_for_explanation(source)
 	inputs = tokenizer(text, return_tensors="pt", truncation=True)
 	attention_mask = inputs["attention_mask"]
-
-	# Get embeddings for the input
 	input_embeds = model.bert.embeddings(inputs["input_ids"])
 	baseline = torch.zeros_like(input_embeds)
 
@@ -94,6 +94,33 @@ def explain_integrated_gradients(text: str, source: Path = SAVED_MODELS_DIR) -> 
 	word_importance = _subword_importance_to_word_importance(token_importance, word_ids)
 
 	if word_importance.max() > 0:
+		word_importance = word_importance / word_importance.max() # normalize to value between 0 and 1
+
+	return word_importance
+
+
+def explain_shap(text: str, source: Path = SAVED_MODELS_DIR) -> np.ndarray:
+	"""Computes word-level importance using SHAP's Partition Explainer with a HuggingFace text-classification pipeline
+	wrapped around our model.
+	"""
+	tokenizer, model = load_model_for_explanation(source)
+	pipe: TextClassificationPipeline = pipeline("text-classification", model=model, tokenizer=tokenizer,
+					return_all_scores=True, truncation=True)
+	explainer = shap.Explainer(pipe) # Use Partition Explainer with a text masker: masks tokens and computes Shapley values
+	shap_values = explainer([text])
+	inputs = tokenizer(text, return_tensors="pt", truncation=True)
+	with torch.no_grad():
+		predicted_class = model(**inputs).logits.argmax(dim=-1).item()
+	# shap_values.values have the shape (1, n_tokens, n_classes) for one importance value per token and class
+	token_importance = np.abs(shap_values.values[0, :, predicted_class]) # take abs of SHAP values for predicted class
+
+	word_ids = inputs.word_ids()
+	if len(token_importance) == len(word_ids):
+		word_importance = _subword_importance_to_word_importance(token_importance, word_ids)
+	else:
+		word_importance = token_importance
+
+	if word_importance.max() > 0:
 		word_importance = word_importance / word_importance.max()
 
 	return word_importance
@@ -103,4 +130,5 @@ def explain_integrated_gradients(text: str, source: Path = SAVED_MODELS_DIR) -> 
 EXPLANATION_METHODS = {
 	"Attention (Last Layer)": explain_attention,
 	"Integrated Gradients": explain_integrated_gradients,
+	"SHAP": explain_shap,
 }
