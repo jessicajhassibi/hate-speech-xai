@@ -12,7 +12,7 @@ label_names = [LABELS[i] for i in sorted(LABELS.keys())]
 
 
 def load_evaluation_results(source: Path = SAVED_MODELS_DIR) -> tuple[list[int], list[int]] | None:
-	"""Load saved test evaluation results (y_true, y_pred) from JSON."""
+	"""Loads saved test evaluation results (y_true, y_pred) from JSON."""
 	eval_path = source / "test_evaluation.json"
 	if not eval_path.exists():
 		return None
@@ -22,7 +22,7 @@ def load_evaluation_results(source: Path = SAVED_MODELS_DIR) -> tuple[list[int],
 
 
 def load_xai_evaluation_results(source: Path = SAVED_MODELS_DIR) -> list[dict] | None:
-	"""Load saved XAI evaluation results from JSON."""
+	"""Loads saved XAI evaluation results from JSON."""
 	eval_path = source / "xai_evaluation.json"
 	if not eval_path.exists():
 		return None
@@ -31,7 +31,11 @@ def load_xai_evaluation_results(source: Path = SAVED_MODELS_DIR) -> list[dict] |
 
 
 def get_classification_report(y_true: list[int], y_pred: list[int]) -> tuple[float, float, dict]:
-	"""Return overall metrics and per-class classification report."""
+	"""Returns overall metrics and per-class classification report.
+		- Accuracy = num of correct predictions / total predictions = TP + TN / TP + TN + FP + FN
+		- Precision = TP / (TP + FP)
+		- Recall = TP / (TP + FN)
+		- F1 = 2 * (precision * recall) / (precision + recall)"""
 	acc = accuracy_score(y_true, y_pred)
 	f1_macro = f1_score(y_true, y_pred, average="macro")
 	report = classification_report(y_true, y_pred, target_names=label_names, output_dict=True)
@@ -39,7 +43,7 @@ def get_classification_report(y_true: list[int], y_pred: list[int]) -> tuple[flo
 
 
 def plot_confusion_matrix(y_true: list[int], y_pred: list[int]) -> Figure:
-	"""Create and return a confusion matrix figure."""
+	"""Creates and returns a confusion matrix figure."""
 	cm = confusion_matrix(y_true, y_pred)
 	fig, ax = plt.subplots(figsize=(2.8, 2.4))
 	sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=label_names, yticklabels=label_names, ax=ax,
