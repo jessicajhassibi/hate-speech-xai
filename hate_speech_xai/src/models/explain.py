@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -6,7 +8,7 @@ from captum.attr import IntegratedGradients
 from hate_speech_xai.config import SAVED_MODELS_DIR
 
 
-def load_model_for_explanation(source=SAVED_MODELS_DIR):
+def load_model_for_explanation(source: Path = SAVED_MODELS_DIR) -> tuple[AutoTokenizer, AutoModelForSequenceClassification]:
 	tokenizer = AutoTokenizer.from_pretrained(source)
 	model = AutoModelForSequenceClassification.from_pretrained(
 		source, output_attentions=True
@@ -15,7 +17,7 @@ def load_model_for_explanation(source=SAVED_MODELS_DIR):
 	return tokenizer, model
 
 
-def _subword_importance_to_word_importance(importance, word_ids):
+def _subword_importance_to_word_importance(importance: np.ndarray, word_ids: list[int | None]) -> np.ndarray:
 	"""For a word, it takes the max importance across its subword tokens.
 	Skips special tokens ([CLS], [SEP], [PAD]) (word_id=None).
 	"""
@@ -35,7 +37,7 @@ def _subword_importance_to_word_importance(importance, word_ids):
 	return result
 
 
-def explain_attention(text: str, source=SAVED_MODELS_DIR):
+def explain_attention(text: str, source: Path = SAVED_MODELS_DIR) -> np.ndarray:
 	"""Computes word-level importance using attention weights.
 	"""
 	tokenizer, model = load_model_for_explanation(source)
@@ -56,7 +58,7 @@ def explain_attention(text: str, source=SAVED_MODELS_DIR):
 	return word_importance
 
 
-def explain_integrated_gradients(text: str, source=SAVED_MODELS_DIR):
+def explain_integrated_gradients(text: str, source: Path = SAVED_MODELS_DIR) -> np.ndarray:
 	"""Compute word-level importance using Integrated Gradients on the
 	embedding layer. Attributes importance to each token embedding,
 	then sums across the embedding dimension to get per-token scores.

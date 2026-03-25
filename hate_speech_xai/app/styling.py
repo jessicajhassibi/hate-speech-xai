@@ -14,14 +14,14 @@ LABEL_COLORS = {
 }
 
 
-def render_label_badge(label_name):
+def render_label_badge(label_name: str) -> str:
     color = LABEL_COLORS[label_name]
     html = f'<span style="background-color: {color}; color: white; padding: 4px 12px; border-radius: 16px; font-weight: 600;">{label_name}</span>'
     return html
 
 
 
-def render_rationale(tokens, rationale):
+def render_rationale(tokens: list[str], rationale: list[int]) -> str:
     parts = []
     for token, r in zip(tokens, rationale):
         if r == 1:
@@ -31,7 +31,7 @@ def render_rationale(tokens, rationale):
     return " ".join(parts)
 
 
-def render_photo_credit():
+def render_photo_credit() -> None:
     """For the "dark" theme we use a free photo from Unsplash. We need to give credit to the photographer."""
 
     st.markdown(
@@ -42,14 +42,14 @@ def render_photo_credit():
     )
 
 
-def apply_theme(theme):
+def apply_theme(theme: str) -> None:
     if theme == "Dark":
         _apply_dark_theme()
     else:
         _apply_professional_theme()
 
 
-def _apply_dark_theme():
+def _apply_dark_theme() -> None:
     """Basically, it applies a dark background picture (can be switched) and changes all the fonts in the elements to white so we have an appropriate contrast.
     Also the box backgrounds needed to be transparent and some other details."""
 
@@ -128,7 +128,7 @@ def _apply_dark_theme():
     st.markdown(css, unsafe_allow_html=True)
 
 
-def _apply_professional_theme():
+def _apply_professional_theme() -> None:
     """Applies custom colors and other details for the professional theme."""
 
     css = """

@@ -5,7 +5,7 @@ from hate_speech_xai.src.data.preprocess import get_majority_label, aggregate_ra
 from hate_speech_xai.src.models.explain import EXPLANATION_METHODS
 
 
-def top_k_overlap(importance, rationale, k=None):
+def top_k_overlap(importance: np.ndarray, rationale: np.ndarray, k: int | None = None) -> float | None:
 	"""Fraction of the top-k important tokens that are also in the ground truth rationale.
 	k defaults to the number of rationale tokens (tokens with above-average rationale value).
 	"""
@@ -29,7 +29,7 @@ def top_k_overlap(importance, rationale, k=None):
 	return overlap / k
 
 
-def evaluate_xai_on_dataset(dataset: Dataset, method_name: str, method_fn, max_samples=None) -> dict:
+def evaluate_xai_on_dataset(dataset: Dataset, method_name: str, method_fn: callable, max_samples: int | None = None) -> dict:
 	"""Evaluates the passed XAI method on a dataset and returns per-metric averages."""
 	top_k_scores = []
 
@@ -62,7 +62,7 @@ def evaluate_xai_on_dataset(dataset: Dataset, method_name: str, method_fn, max_s
 	}
 
 
-def evaluate_all_xai_methods(dataset: Dataset, max_samples=None) -> list[dict]:
+def evaluate_all_xai_methods(dataset: Dataset, max_samples: int | None = None) -> list[dict]:
 	results = []
 	for method_name, method_fn in EXPLANATION_METHODS.items():
 		print(f"Evaluating {method_name}...")

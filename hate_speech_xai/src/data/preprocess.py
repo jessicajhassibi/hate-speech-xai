@@ -57,7 +57,7 @@ def preprocess_post(post: dict) -> dict:
 	}
 
 
-def tokenize_post(post: dict):
+def tokenize_post(post: dict) -> dict:
 	"""Tokenize preprocessed post and align rationales with subword tokens."""
 	encoding = tokenizer(
 		post["text"],
