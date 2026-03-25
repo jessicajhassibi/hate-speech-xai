@@ -77,6 +77,4 @@ python -m pytest hate_speech_xai/tests/
 streamlit run hate_speech_xai/app/app.py
 ```
 
-## Preview of the App
-
 
