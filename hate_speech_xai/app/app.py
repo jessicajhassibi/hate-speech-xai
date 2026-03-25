@@ -1,6 +1,7 @@
 import streamlit as st
 
 from hate_speech_xai.app.styling import THEMES, apply_theme, render_photo_credit
+from hate_speech_xai.config import APP_DATA_DIR, REPORT_DIR, REPORT_NAME, REPORT_PATH
 from hate_speech_xai.app.sections import (
 	dataset_explorer,
 	post_explorer,
@@ -23,6 +24,11 @@ st.sidebar.markdown("""
 - [Explanation Visualization](#explanation-visualization)
 - [Model Evaluation](#model-evaluation-on-test-set)
 """)
+
+if REPORT_PATH.exists():
+	st.sidebar.markdown("### Report")
+	with open(REPORT_PATH, "rb") as f:
+		st.sidebar.download_button("Download Report (PDF)", f.read(), file_name=REPORT_NAME, mime="application/pdf")
 
 st.title("Explainable AI for Hate Speech Detection")
 st.caption("Practical Project made by Jessica Hassibi, Winter Semester 2025/26 for the Practical Course AI and Security by TU Darmstadt "

@@ -8,6 +8,10 @@ CHECKPOINT_V2_DIR = Path(BASE_DIR) / "checkpoints_v2"
 APP_DATA_DIR = Path(BASE_DIR) / "app/data"
 PREPROCESSED_DATA_DIR = Path(BASE_DIR) / "data/preprocessed"
 
+REPORT_DIR = Path(BASE_DIR) / "report"
+REPORT_NAME = "Report_on_an_Explainable_AI_project_for_Hate_Speech_Classification.pdf"
+REPORT_PATH = REPORT_DIR / REPORT_NAME
+
 # Labels in HateXplain
 LABELS = {
     0: "Hate speech",
