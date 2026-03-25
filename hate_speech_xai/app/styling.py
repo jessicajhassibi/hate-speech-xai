@@ -51,7 +51,7 @@ def apply_theme(theme: str) -> None:
 
 def _apply_dark_theme() -> None:
     """Basically, it applies a dark background picture (can be switched) and changes all the fonts in the elements to white so we have an appropriate contrast.
-    Also the box backgrounds needed to be transparent and some other details."""
+    Also the box, button, and expander backgrounds needed to be transparent and some other details."""
 
     image_path = APP_DATA_DIR / "background.jpg"
     with open(image_path, "rb") as f:
@@ -127,9 +127,13 @@ def _apply_dark_theme() -> None:
         color: black !important;
     }}
     
-    /* Info boxes: width should match the content width*/
     .stAlert {{
         width: fit-content !important;
+    }}
+
+    [data-testid="stExpander"] summary {{
+        background-color: rgba(0, 0, 0, 0.4) !important;
+        border-radius: 8px;
     }}
     </style>
     """
@@ -174,7 +178,6 @@ def _apply_professional_theme() -> None:
         color: #333 !important;
     }
 
-    /* Info boxes: fit content width */
     .stAlert {
         width: fit-content !important;
     }
