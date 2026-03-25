@@ -46,7 +46,7 @@ docker run -p 8501:8501 hate-speech-xai
 The app starts at http://localhost:8501 in your browser.
 
 ### Option B: using Makefile
-> **Note:** With Option B & C you only need to install the dependencies and start the app (steps 1 and 7). You could also run the whole pipeline again if you want with the following commands.
+> **Note:** With Option B & C you only need to install the dependencies and start the app (steps 1 and 8). You could also run the whole pipeline again if you want with the following commands.
 #### 1) Installation of dependencies
 `make install`
 #### 2) Accessing the data
@@ -60,7 +60,9 @@ There is no need to download it manually. The `datasets` library will handle the
 `make evaluate`
 #### 6) Evaluating the XAI methods
 `make evaluate-xai`
-#### 7) Starting the app
+#### 7) Running the tests
+`make test`
+#### 8) Starting the app
 `make app`
 
 ### Option C: manual
@@ -71,6 +73,7 @@ python -m hate_speech_xai.scripts.run_preprocessing
 python -m hate_speech_xai.scripts.run_training
 python -m hate_speech_xai.scripts.run_evaluation
 python -m hate_speech_xai.scripts.run_xai_evaluation
+python -m pytest hate_speech_xai/tests/
 streamlit run hate_speech_xai/app/app.py
 ```
 
