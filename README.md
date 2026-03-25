@@ -7,6 +7,8 @@ Practical Project made by Jessica Hassibi, Winter Semester 2025/26,
 for the Practical Course AI and Security by TU Darmstadt and the Fraunhofer SIT of Darmstadt.
 This project is based on and builds upon the research of Mathew et al. [1].
 
+The written report is available at [`hate_speech_xai/report/`](hate_speech_xai/report/Report_on_an_Explainable_AI_project_for_Hate_Speech_Classification.pdf).
+
 ## What are we doing here?
 We are interested in understanding the decision-making process of a hate speech detection model. 
 We are using the HateXplain dataset [1], which contains social media posts labeled for hate speech and target groups, 
