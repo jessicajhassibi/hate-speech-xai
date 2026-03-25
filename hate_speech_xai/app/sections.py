@@ -316,7 +316,7 @@ def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int,
 	with st.expander("What do these metrics mean?"):
 		st.markdown(
 			"- **Top-k Overlap**: Of the top-k tokens the method considers most important, "
-			"how many match the ground truth rationale tokens? (k = number of rationale tokens)"
+			"how many match the k important ground truth rationale tokens?"
 		)
 
 	xai_results = load_xai_evaluation_results()

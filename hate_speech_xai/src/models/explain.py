@@ -63,7 +63,6 @@ def explain_integrated_gradients(text: str, source: Path = SAVED_MODELS_DIR) -> 
 	embedding layer. Attributes importance to each token embedding,
 	then sums across the embedding dimension to get per-token scores.
 	"""
-
 	tokenizer, model = load_model_for_explanation(source)
 	inputs = tokenizer(text, return_tensors="pt", truncation=True)
 	attention_mask = inputs["attention_mask"]
@@ -72,7 +71,6 @@ def explain_integrated_gradients(text: str, source: Path = SAVED_MODELS_DIR) -> 
 	input_embeds = model.bert.embeddings(inputs["input_ids"])
 	baseline = torch.zeros_like(input_embeds)
 
-	# Predicted class to explain
 	with torch.no_grad():
 		predicted_class = model(**inputs).logits.argmax(dim=-1).item()
 

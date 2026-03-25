@@ -9,7 +9,7 @@ from hate_speech_xai.src.models.explain import EXPLANATION_METHODS
 
 def top_k_overlap(importance: np.ndarray, rationale: np.ndarray, k: int | None = None) -> float | None:
 	"""Fraction of the top-k important tokens that are also in the ground truth rationale.
-	k defaults to the number of rationale tokens (tokens with above-average rationale value).
+	k defaults to tokens with above-average rationale values which is basically the number of rationale tokens (all 1s are above average).
 	"""
 	if len(importance) == 0 or len(rationale) == 0:
 		return None
