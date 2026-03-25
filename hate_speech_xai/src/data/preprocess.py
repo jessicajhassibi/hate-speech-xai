@@ -46,9 +46,9 @@ def get_post_as_str(tokens: list) -> str:
 
 def preprocess_post(post: dict) -> dict:
 	"""Performs preprocessing steps: majority label, aggregated rationales, joined text."""
+	text = get_post_as_str(post["post_tokens"])
 	label = get_majority_label(post["annotators"]["label"])
 	rationale = aggregate_rationales(post["rationales"], label)
-	text = get_post_as_str(post["post_tokens"])
 
 	return {
 		"text": text,
