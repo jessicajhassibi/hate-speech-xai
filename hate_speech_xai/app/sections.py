@@ -26,7 +26,7 @@ def _get_label_distribution(_splits: dict) -> pd.DataFrame:
 
 
 def dataset_explorer(splits: dict) -> None:
-	st.subheader("HateXplain Dataset Explorer")
+	st.subheader("HateXplain Dataset Explorer", anchor="hatexplain-dataset-explorer")
 	st.write("We will explore the HateXplain dataset, a benchmark for explainable hate speech detection.")
 
 	st.markdown("#### Class Distribution")
@@ -82,7 +82,7 @@ def dataset_explorer(splits: dict) -> None:
 
 
 def post_explorer(splits: dict) -> tuple[dict, list[str], str, int]:
-	st.subheader("Post Explorer")
+	st.subheader("Post Explorer", anchor="post-explorer")
 	st.write("We are now exploring a single post from the dataset.")
 	selected_splits = st.multiselect(
 		"Filter by dataset split",
@@ -180,7 +180,7 @@ def _plot_token_heatmap(values: np.ndarray, tokens: list[str], cmap: str, title:
 
 
 def classifier(text: str, ground_truth_id: int) -> None:
-	st.subheader("Hate Speech Classifier")
+	st.subheader("Hate Speech Classifier", anchor="hate-speech-classifier")
 	st.write(f"Lets see how a classifier trained on the pretrained {MODEL_NAME} performs on the selected post.")
 
 	predicted_label_id = predict_label(text)
@@ -210,7 +210,7 @@ def classifier(text: str, ground_truth_id: int) -> None:
 
 
 def explanations(text: str, tokens: list[str], example: dict, ground_truth_id: int) -> tuple[int, list[str]]:
-	st.subheader("Explanation Visualization")
+	st.subheader("Explanation Visualization", anchor="explanation-visualization")
 	st.write("Back to the selected post from HateXplain. Let's see how the model explains its own prediction.")
 
 	method_name = st.selectbox("Explanation method", list(EXPLANATION_METHODS.keys()))
@@ -240,7 +240,7 @@ def explanations(text: str, tokens: list[str], example: dict, ground_truth_id: i
 
 
 def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int, display_tokens: list[str]) -> None:
-	st.markdown("#### Model Evaluation on Test Set")
+	st.subheader("Model Evaluation on Test Set", anchor="model-evaluation-on-test-set")
 	st.write("**Performance based metrics**")
 	st.info("These metrics are computed on the full test set (1924 samples) that the model never saw during training. ")
 
