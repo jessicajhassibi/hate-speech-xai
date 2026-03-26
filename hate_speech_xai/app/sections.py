@@ -179,7 +179,8 @@ def post_explorer(splits: dict) -> tuple[dict, list[str], str, int]:
 
 
 def _plot_token_heatmap(values: np.ndarray, tokens: list[str], cmap: str, title: str) -> Figure:
-	fig, ax = plt.subplots(figsize=(10, 0.6))
+	width = max(4, len(tokens) * 0.4)
+	fig, ax = plt.subplots(figsize=(width, 0.5))
 	ax.imshow([values], cmap=cmap, aspect="auto")
 	ax.set_yticks([])
 	ax.set_xticks(range(len(tokens)))
