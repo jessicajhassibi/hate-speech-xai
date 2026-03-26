@@ -106,19 +106,27 @@ def explain_integrated_gradients(text: str, source: Path = SAVED_MODELS_DIR) -> 
 	return word_importance
 
 
+shap_explainer_cache: dict[str, shap.Explainer] = {}
+
+
 def explain_shap(text: str, source: Path = SAVED_MODELS_DIR) -> np.ndarray:
 	"""Computes word-level importance using SHAP's Partition Explainer with a HuggingFace text-classification pipeline
 	wrapped around our model.
 	"""
+	key = str(source)
+	if key not in shap_explainer_cache:
+		tokenizer, model = load_model_for_explanation(source)
+		pipe = pipeline("text-classification", model=model, tokenizer=tokenizer,
+						return_all_scores=True, truncation=True, device="cpu")
+		shap_explainer_cache[key] = shap.Explainer(pipe, max_evals=200) #  only 200 model evaluations per sample, don't try all masking combinations
+
 	tokenizer, model = load_model_for_explanation(source)
+	explainer = shap_explainer_cache[key]
 	inputs = tokenizer(text, return_tensors="pt", truncation=True)
 
 	with torch.no_grad():
 		predicted_class = model(**inputs).logits.argmax(dim=-1).item()
 
-	pipe: TextClassificationPipeline = pipeline("text-classification", model=model, tokenizer=tokenizer,
-					return_all_scores=True, truncation=True, device="cpu") # device="cpu" to keep the model on cpu, pipeline from Huggingface otherwise would have moved it to MPS on Mac
-	explainer = shap.Explainer(pipe) # Use Partition Explainer with a text masker: masks tokens and computes Shapley values
 	shap_values = explainer([text])
 
 	# shap_values.values have the shape (1, n_tokens, n_classes) for one importance value per token and class
@@ -140,6 +148,5 @@ def explain_shap(text: str, source: Path = SAVED_MODELS_DIR) -> np.ndarray:
 EXPLANATION_METHODS = {
 	"Attention (Last Layer)": explain_attention,
 	"Integrated Gradients": explain_integrated_gradients,
-	# "SHAP": explain_shap,
-	# as time was not sufficient and evaluating SHAP took very long, SHAP was dropped
+	"SHAP": explain_shap,
 }
