@@ -181,7 +181,7 @@ def _plot_token_heatmap(values: np.ndarray, tokens: list[str], cmap: str, title:
 
 def classifier(text: str, ground_truth_id: int) -> None:
 	st.subheader("Hate Speech Classifier", anchor="hate-speech-classifier")
-	st.write(f"Lets see how a classifier trained on the pretrained {MODEL_NAME} performs on the selected post.")
+	st.write(f"Lets see how a classifier trained on the pretrained [{MODEL_NAME}](https://huggingface.co/google-bert/bert-base-uncased) performs on the selected post.")
 
 	predicted_label_id = predict_label(text)
 
