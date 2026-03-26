@@ -218,18 +218,22 @@ def classifier(text: str, ground_truth_id: int) -> None:
 		)
 
 
-def explanations(text: str, tokens: list[str], example: dict, ground_truth_id: int) -> tuple[int, list[str]]:
+def explanations(text: str, tokens: list[str], example: dict, ground_truth_id: int) -> tuple[int, list[str], dict[str, np.ndarray]]:
 	st.subheader("Explanation Visualization", anchor="explanation-visualization")
 	st.write("Back to the selected post from HateXplain. Let's see how the model explains its own prediction.")
 
 	method_name = st.selectbox("Explanation method", list(EXPLANATION_METHODS.keys()))
 	method = EXPLANATION_METHODS[method_name]
 	importance = method(text)
+	st.info("Note: SHAP is computationally expensive as it requires many forward passes per sample.")
 
 	# Importance may be shorter than tokens due to truncation
 	display_len = min(len(tokens), len(importance))
 	importance = importance[:display_len]
 	display_tokens = tokens[:display_len]
+
+	# Cache computed importance to reuse them in the evaluation heatmaps below
+	cached_importance = {method_name: importance}
 
 	fig = _plot_token_heatmap(importance, display_tokens, "Reds", f"Token-level Importance ({method_name})")
 	st.pyplot(fig, use_container_width=False)
@@ -247,10 +251,10 @@ def explanations(text: str, tokens: list[str], example: dict, ground_truth_id: i
 			"its contribution to the prediction by systematically masking tokens and observing how the output changes."
 		)
 
-	return display_len, display_tokens
+	return display_len, display_tokens, cached_importance
 
 
-def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int, display_tokens: list[str]) -> None:
+def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int, display_tokens: list[str], cached_importance: dict[str, np.ndarray] | None = None) -> None:
 	st.subheader("Model Evaluation on Test Set", anchor="model-evaluation-on-test-set")
 	st.write("**Performance based metrics**")
 	st.info("These metrics are computed on the full test set (1924 samples) that the model never saw during training. ")
@@ -357,18 +361,43 @@ def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int,
 	fig_gt = _plot_token_heatmap(gt_display_eval, display_tokens, "Oranges", "Ground Truth Rationale")
 	st.pyplot(fig_gt, use_container_width=False)
 
+	# Reset button states when the selected post changes
+	post_id = example["id"]
+	if st.session_state.get("comparison_post_id") != post_id:
+		st.session_state["comparison_post_id"] = post_id
+		for r in xai_results:
+			st.session_state[f"show_{r['method']}"] = False
+
 	for r in xai_results:
 		method_name_eval = r["method"]
 		if method_name_eval not in EXPLANATION_METHODS:
 			continue
-		method_fn = EXPLANATION_METHODS[method_name_eval]
-		imp = method_fn(text)
-		imp_display = imp[:display_len]
+
+		# Reuse importance from the explanation visualization if already computed
+		if cached_importance and method_name_eval in cached_importance:
+			st.session_state[f"show_{method_name_eval}"] = True
+
+		if not st.session_state.get(f"show_{method_name_eval}"):
+			label = f"Compute {method_name_eval}"
+			if method_name_eval == "SHAP":
+				label += " (slow: many forward passes per sample)"
+			if st.button(label, key=f"btn_{method_name_eval}"):
+				st.session_state[f"show_{method_name_eval}"] = True
+				st.rerun()
+			continue
+
+		if cached_importance and method_name_eval in cached_importance:
+			imp_for_display = cached_importance[method_name_eval]
+			importance = imp_for_display
+		else:
+			method_fn = EXPLANATION_METHODS[method_name_eval]
+			importance = method_fn(text)
+			imp_for_display = importance[:display_len]
 
 		title = method_name_eval
-		top_k_eval_result = top_k_overlap(imp, gt_rationale_eval)
+		top_k_eval_result = top_k_overlap(importance, gt_rationale_eval)
 		if top_k_eval_result is not None:
 			title = f"{method_name_eval} — Top-k Overlap: {top_k_eval_result:.2%}"
 
-		fig = _plot_token_heatmap(imp_display, display_tokens, "Reds", title)
+		fig = _plot_token_heatmap(imp_for_display, display_tokens, "Reds", title)
 		st.pyplot(fig, use_container_width=False)

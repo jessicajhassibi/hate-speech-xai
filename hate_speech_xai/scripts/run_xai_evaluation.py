@@ -9,6 +9,7 @@ def main():
     _, _, test_ds = load_hatexplain_dataset()
 
     # its slow due to the number of forward passes per sample in the Integrated Gradients method
+    # also SHAP takes a long time to run
     # if you want to reproduce that it works and speed it up, you can use:
     # results = evaluate_all_xai_methods(test_ds, max_samples=200)
     results = evaluate_all_xai_methods(test_ds)

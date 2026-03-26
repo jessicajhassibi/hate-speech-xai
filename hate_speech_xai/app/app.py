@@ -48,10 +48,10 @@ st.divider()
 classifier(text, ground_truth_id)
 st.divider()
 
-display_len, display_tokens = explanations(text, tokens, example, ground_truth_id)
+display_len, display_tokens, cached_importance = explanations(text, tokens, example, ground_truth_id)
 st.divider()
 
-evaluation(example, text, ground_truth_id, display_len, display_tokens)
+evaluation(example, text, ground_truth_id, display_len, display_tokens, cached_importance)
 
 if theme == "Dark":
 	render_photo_credit()
