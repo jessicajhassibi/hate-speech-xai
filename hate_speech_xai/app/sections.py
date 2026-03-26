@@ -326,12 +326,9 @@ def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int,
 
 	with st.expander("What do these metrics mean?"):
 		st.markdown(
-			"- **Top-k Overlap** (Plausibility): Of the top-k tokens the method considers most important, "
-			"how many match the k important ground truth rationale tokens?\n"
-			"- **Comprehensiveness** (Faithfulness): Remove the top-k important tokens and measure the drop in prediction confidence. "
-			"Higher values mean the explanation is more faithful — the model truly relied on those tokens.\n"
-			"- **Sufficiency** (Faithfulness): Keep only the top-k important tokens and measure the drop in confidence. "
-			"Lower values mean the important tokens alone are sufficient for the prediction."
+			"- **Top-k Overlap**: Refers to the plausibility aspect of the explanations. "
+			"Of the top-k tokens the method considers most important, "
+			"how many match the k important ground truth rationale tokens?"
 		)
 
 	xai_results = load_xai_evaluation_results()
@@ -344,8 +341,6 @@ def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int,
 		xai_rows.append({
 			"Method": r["method"],
 			"Top-k Overlap": f"{r['top_k_overlap']:.2%}" if r.get("top_k_overlap") else "—",
-			"Comprehensiveness": f"{r['comprehensiveness']:.2%}" if r.get("comprehensiveness") else "—",
-			"Sufficiency": f"{r['sufficiency']:.2%}" if r.get("sufficiency") else "—",
 		})
 	st.table(xai_rows)
 	st.caption(
@@ -354,7 +349,7 @@ def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int,
 		", which makes a top-k overlap comparison meaningless."
 	)
 
-	st.write("**Direct comparison of XAI methods evaluation on the selected post from above**")
+	st.write("**Direct comparison of highlighted tokens resulting from by XAI methods on the selected post from above**")
 
 	gt_rationale_eval = aggregate_rationales(example["rationales"], ground_truth_id)
 	gt_display_eval = gt_rationale_eval[:display_len]
