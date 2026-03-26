@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 from hate_speech_xai.app.styling import render_label_badge, render_rationale
 from hate_speech_xai.config import MODEL_NAME, LABELS
 from hate_speech_xai.src.data.preprocess import get_majority_label, get_post_as_str, aggregate_rationales
-from hate_speech_xai.src.data.analyze import compute_label_distribution
+from hate_speech_xai.src.data.analyze import compute_label_distribution, compute_annotator_agreement, compute_imbalance_ratio
 from hate_speech_xai.src.models.evaluate import (
 	load_evaluation_results, load_xai_evaluation_results,
 	get_classification_report, plot_confusion_matrix,
@@ -71,15 +71,24 @@ def dataset_explorer(splits: dict) -> None:
 
 	with col_table:
 		st.dataframe(pivot, width="stretch")
-		max_class = dist_df["Label"].value_counts().max()
-		min_class = dist_df["Label"].value_counts().min()
-		st.metric("Imbalance ratio", f"{max_class / min_class:.2f}")
-		with st.expander("What does this measure mean?"):
-			st.markdown("For a dataset with n classes, the imbalance ratio is the count of the largest class (here: Normal) divided by "
-						"the count of the smallest class (Offensive). A ratio of 1.0 means perfectly balanced classes, while values "
-						"higher than that indicate that some classes are overrepresented compared to others, "
-						"which could lead to bias of the model toward the majority class.")
+		imbalance = compute_imbalance_ratio(splits)
+		unanimous, total = compute_annotator_agreement(splits)
 
+		col_m1, col_m2 = st.columns(2)
+		with col_m1:
+			st.metric("Imbalance ratio", f"{imbalance:.2f}")
+		with col_m2:
+			st.metric("Annotator agreement", f"{unanimous/total:.1%}")
+
+		with st.expander("What do these measures mean?"):
+			st.markdown(
+				"- **Imbalance ratio**: For a dataset with n classes, the imbalance ratio is the count of the largest class (here: Normal) divided by "
+				"the count of the smallest class (Offensive). A ratio of 1.0 means perfectly balanced classes, while values "
+				"higher than that indicate that some classes are overrepresented compared to others, "
+				"which could lead to bias of the model toward the majority class.\n\n"
+				"- **Annotator agreement**: Only about half of the posts have all 3 annotators agreeing on the same label. "
+				"For the remaining posts, at least one annotator chose a different label, highlighting the subjectivity of hate speech classification."
+			)
 
 def post_explorer(splits: dict) -> tuple[dict, list[str], str, int]:
 	st.subheader("Post Explorer", anchor="post-explorer")
@@ -181,7 +190,7 @@ def _plot_token_heatmap(values: np.ndarray, tokens: list[str], cmap: str, title:
 
 def classifier(text: str, ground_truth_id: int) -> None:
 	st.subheader("Hate Speech Classifier", anchor="hate-speech-classifier")
-	st.write(f"Lets see how a classifier trained on the pretrained [{MODEL_NAME}](https://huggingface.co/google-bert/bert-base-uncased) performs on the selected post.")
+	st.write(f"Let's find out how a classifier trained on the pretrained [{MODEL_NAME}](https://huggingface.co/google-bert/bert-base-uncased) performs on the selected post.")
 
 	predicted_label_id = predict_label(text)
 
@@ -234,9 +243,8 @@ def explanations(text: str, tokens: list[str], example: dict, ground_truth_id: i
 			"- **Integrated Gradients**: A gradient-based attribution method that computes the importance of each token "
 			"by accumulating gradients along a path from a neutral baseline (zero embedding) to the actual input. "
 			"This captures how much each token contributes to the predicted class.\n"
-		"- **SHAP**: Based on Shapley values from game theory. Treats each token as a 'player' and measures "
-		"its contribution to the prediction by systematically masking tokens and observing how the output changes. "
-		"SHAP is model-agnostic, since it doesn't rely on model internals."
+			"- **SHAP**: Based on Shapley values from game theory. Treats each token as a 'player' and measures "
+			"its contribution to the prediction by systematically masking tokens and observing how the output changes."
 		)
 
 	return display_len, display_tokens
@@ -318,8 +326,12 @@ def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int,
 
 	with st.expander("What do these metrics mean?"):
 		st.markdown(
-			"- **Top-k Overlap**: Of the top-k tokens the method considers most important, "
-			"how many match the k important ground truth rationale tokens?"
+			"- **Top-k Overlap** (Plausibility): Of the top-k tokens the method considers most important, "
+			"how many match the k important ground truth rationale tokens?\n"
+			"- **Comprehensiveness** (Faithfulness): Remove the top-k important tokens and measure the drop in prediction confidence. "
+			"Higher values mean the explanation is more faithful — the model truly relied on those tokens.\n"
+			"- **Sufficiency** (Faithfulness): Keep only the top-k important tokens and measure the drop in confidence. "
+			"Lower values mean the important tokens alone are sufficient for the prediction."
 		)
 
 	xai_results = load_xai_evaluation_results()
@@ -331,7 +343,9 @@ def evaluation(example: dict, text: str, ground_truth_id: int, display_len: int,
 	for r in xai_results:
 		xai_rows.append({
 			"Method": r["method"],
-			"Top-k Overlap": f"{r['top_k_overlap']:.2%}" if r["top_k_overlap"] else "—",
+			"Top-k Overlap": f"{r['top_k_overlap']:.2%}" if r.get("top_k_overlap") else "—",
+			"Comprehensiveness": f"{r['comprehensiveness']:.2%}" if r.get("comprehensiveness") else "—",
+			"Sufficiency": f"{r['sufficiency']:.2%}" if r.get("sufficiency") else "—",
 		})
 	st.table(xai_rows)
 	st.caption(
