@@ -104,13 +104,16 @@ def explain_shap(text: str, source: Path = SAVED_MODELS_DIR) -> np.ndarray:
 	wrapped around our model.
 	"""
 	tokenizer, model = load_model_for_explanation(source)
-	pipe: TextClassificationPipeline = pipeline("text-classification", model=model, tokenizer=tokenizer,
-					return_all_scores=True, truncation=True)
-	explainer = shap.Explainer(pipe) # Use Partition Explainer with a text masker: masks tokens and computes Shapley values
-	shap_values = explainer([text])
 	inputs = tokenizer(text, return_tensors="pt", truncation=True)
+
 	with torch.no_grad():
 		predicted_class = model(**inputs).logits.argmax(dim=-1).item()
+
+	pipe: TextClassificationPipeline = pipeline("text-classification", model=model, tokenizer=tokenizer,
+					return_all_scores=True, truncation=True, device="cpu") # device="cpu" to keep the model on cpu, pipeline from Huggingface otherwise would have moved it to MPS on Mac
+	explainer = shap.Explainer(pipe) # Use Partition Explainer with a text masker: masks tokens and computes Shapley values
+	shap_values = explainer([text])
+
 	# shap_values.values have the shape (1, n_tokens, n_classes) for one importance value per token and class
 	token_importance = np.abs(shap_values.values[0, :, predicted_class]) # take abs of SHAP values for predicted class
 
