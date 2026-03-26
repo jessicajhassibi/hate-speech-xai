@@ -8,15 +8,22 @@ from captum.attr import IntegratedGradients
 
 from hate_speech_xai.config import SAVED_MODELS_DIR
 
+_model_cache: dict[str, tuple[AutoTokenizer, AutoModelForSequenceClassification]] = {}
+
 
 def load_model_for_explanation(source: Path = SAVED_MODELS_DIR) -> tuple[AutoTokenizer, AutoModelForSequenceClassification]:
-	"""Loads our fine-tuned tokenizer and model with output_attentions set to True."""
-	tokenizer = AutoTokenizer.from_pretrained(source)
-	model = AutoModelForSequenceClassification.from_pretrained(
-		source, output_attentions=True
-	)
-	model.eval()
-	return tokenizer, model
+	"""Loads our fine-tuned tokenizer and model with output_attentions set to True.
+	The result is cached so subsequent calls with the same source reuse the loaded model.
+	"""
+	key = str(source)
+	if key not in _model_cache:
+		tokenizer = AutoTokenizer.from_pretrained(source)
+		model = AutoModelForSequenceClassification.from_pretrained(
+			source, output_attentions=True
+		)
+		model.eval()
+		_model_cache[key] = (tokenizer, model)
+	return _model_cache[key]
 
 
 def _subword_importance_to_word_importance(importance: np.ndarray, word_ids: list[int | None]) -> np.ndarray:
@@ -133,5 +140,6 @@ def explain_shap(text: str, source: Path = SAVED_MODELS_DIR) -> np.ndarray:
 EXPLANATION_METHODS = {
 	"Attention (Last Layer)": explain_attention,
 	"Integrated Gradients": explain_integrated_gradients,
-	"SHAP": explain_shap,
+	# "SHAP": explain_shap,
+	# as time was not sufficient and evaluating SHAP took very long, SHAP was dropped
 }
