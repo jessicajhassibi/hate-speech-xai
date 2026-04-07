@@ -1,10 +1,10 @@
 # hate-speech-xai
-# Explainabile AI on Hate Speech Detection
+# Explainable AI on Hate Speech Detection
 
 This repository contains the full code for an Explainable AI (XAI) study on a Hate Speech dataset. 
 
-Practical Project made by Jessica Hassibi, Winter Semester 2025/26, 
-for the Practical Course AI and Security by TU Darmstadt and the Fraunhofer SIT of Darmstadt.
+Project made by Jessica Hassibi, Winter Semester 2025/26, 
+for a Practical Course in AI and Security.
 This project is based on and builds upon the research of Mathew et al. [1].
 
 The written report is available at [`hate_speech_xai/report/`](hate_speech_xai/report/Report_on_an_Explainable_AI_project_for_Hate_Speech_Classification.pdf).
@@ -14,7 +14,7 @@ We are interested in understanding the decision-making process of a hate speech 
 We are using the HateXplain dataset [1], which contains social media posts labeled for hate speech and target groups, 
 along with rationales that indicate why exactly a post is considered toxic or not. 
 We train a transformer-based model (BERT) on this dataset and then apply various XAI techniques 
-to understand which features are most influential in the model's decision of whether a post is classified as hate speech or not.
+to understand which features are most influential in the model's decision about whether a post is classified as hate speech.
 We evaluate the model on its classification performance as well as its performance on the XAI methods comparing the 
 ground truth to the computed importance.
 
