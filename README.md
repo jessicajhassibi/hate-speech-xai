@@ -18,6 +18,11 @@ to understand which features are most influential in the model's decision of whe
 We evaluate the model on its classification performance as well as its performance on the XAI methods comparing the 
 ground truth to the computed importance.
 
+## App Preview
+![App screenshot](hate_speech_xai/data/figures/app_screenshot.png)
+![Heatmaps](hate_speech_xai/data/figures/heatmaps.png)
+![Dark theme](hate_speech_xai/data/figures/dark_theme.png)
+
 ### References
 [1] [HateXplain Dataset](https://github.com/hate-alert/HateXplain).
 Used in the following paper:
